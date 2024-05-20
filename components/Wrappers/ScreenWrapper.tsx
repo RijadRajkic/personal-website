@@ -5,5 +5,5 @@ interface ScreenWrapperProps {
 }
 
 export const ScreenWrapper = ({ children }: ScreenWrapperProps) => {
- return <div className="flex h-full w-full flex-row gap-2 p-3">{children}</div>;
+ return <div className="flex flex-col h-full w-full px-8 justify-between">{children}</div>;
 };

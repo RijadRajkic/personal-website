@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useRouter } from "next/router";
 
 interface CornerComponentProps {
  corner: "top-left" | "top-right" | "bottom-left" | "bottom-right";
  link?: string;
- label?: string;
+ content?: string | ReactNode;
 }
 
-export const OuterComponent = ({ corner, link, label }: CornerComponentProps) => {
+export const OuterComponent = ({ corner, link, content }: CornerComponentProps) => {
  const [effect, setEffect] = useState(false);
  const router = useRouter();
  let outerCornerStyle = "";
@@ -44,10 +44,12 @@ export const OuterComponent = ({ corner, link, label }: CornerComponentProps) =>
 
  return (
   <button
-   className={`bg-white p-4 w-full h-[50%] border-rose-600 ${effect ? "animate-hoverPop" : ""} ${outerCornerStyle}`}
+   className={` bg-gradient-radial from-secondary to-accent p-4 w-fit h-fit min-w-80 min-h-80 border-rose-600 ${
+    effect ? "animate-hoverPop" : ""
+   } ${outerCornerStyle}`}
    onClick={handleClick}
   >
-   <div className="flex justify-center items-center h-full">{label}</div>
+   <div className="flex justify-center items-center h-full">{content}</div>
   </button>
  );
 };
