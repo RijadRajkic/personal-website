@@ -4,3 +4,4 @@ export * from "./CenterImage";
 export * from "./Footer";
 export * from "./Navbar";
 export * from "./AboutMe";
+export * from "./Loader";
