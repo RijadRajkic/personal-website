@@ -1,0 +1,306 @@
+@import "tailwindcss";
+@import "../lib/animations/animations.css";
+
+/* ============================================================================
+ * Theme — Tailwind v4 custom design tokens
+ *
+ * All `--color-*` values automatically generate utility classes:
+ *   bg-evergreen-500, text-copper-200, border-almond-cream-100, etc.
+ *
+ * Font variables reference the CSS custom properties set by next/font/local
+ * on <html>, so we use `@theme inline` to avoid generating classes for them.
+ * ========================================================================= */
+
+@theme {
+ /* --- Evergreen (primary accent) --- */
+ --color-evergreen-50: #eafaf5;
+ --color-evergreen-100: #c8f0e0;
+ --color-evergreen-200: #a3e4c9;
+ --color-evergreen-300: #7cd5b1;
+ --color-evergreen-400: #56c498;
+ --color-evergreen-500: #3da87e;
+ --color-evergreen-600: #2f8664;
+ --color-evergreen-700: #24664d;
+ --color-evergreen-800: #1a4836;
+ --color-evergreen-900: #102c21;
+ --color-evergreen-950: #071d15;
+
+ /* --- Copper (warmth) --- */
+ --color-copper-50: #f8f3ec;
+ --color-copper-100: #efe3d2;
+ --color-copper-200: #e0c9a8;
+ --color-copper-300: #d0ad7e;
+ --color-copper-400: #c0935a;
+ --color-copper-500: #a67a45;
+ --color-copper-600: #856137;
+ --color-copper-700: #654a2a;
+ --color-copper-800: #47341d;
+ --color-copper-900: #2c2012;
+ --color-copper-950: #1a120a;
+
+ /* --- Dusty Lavender (subtle highlights) --- */
+ --color-dusty-lavender-50: #f5eff2;
+ --color-dusty-lavender-100: #e8dbe1;
+ --color-dusty-lavender-200: #d4bcc9;
+ --color-dusty-lavender-300: #be9baf;
+ --color-dusty-lavender-400: #a87d96;
+ --color-dusty-lavender-500: #8e6380;
+ --color-dusty-lavender-600: #714f66;
+ --color-dusty-lavender-700: #563c4e;
+ --color-dusty-lavender-800: #3d2842;
+ --color-dusty-lavender-900: #2d1a30;
+ --color-dusty-lavender-950: #1c0f1e;
+
+ /* --- Almond Cream (surfaces) --- */
+ --color-almond-cream-50: #f6f2ee;
+ --color-almond-cream-100: #ebe3d9;
+ --color-almond-cream-200: #d8c9b6;
+ --color-almond-cream-300: #c3ad92;
+ --color-almond-cream-400: #ae9271;
+ --color-almond-cream-500: #937858;
+ --color-almond-cream-600: #766046;
+ --color-almond-cream-700: #5a4935;
+ --color-almond-cream-800: #3f3325;
+ --color-almond-cream-900: #262016;
+ --color-almond-cream-950: #17120c;
+
+ /* --- Molten Lava (destructive / alerts) --- */
+ --color-molten-lava-50: #fdebe7;
+ --color-molten-lava-100: #f9cfc6;
+ --color-molten-lava-200: #f2a190;
+ --color-molten-lava-300: #e8715b;
+ --color-molten-lava-400: #db4832;
+ --color-molten-lava-500: #b93520;
+ --color-molten-lava-600: #942a19;
+ --color-molten-lava-700: #702013;
+ --color-molten-lava-800: #4e160d;
+ --color-molten-lava-900: #300d07;
+ --color-molten-lava-950: #220802;
+}
+
+@theme inline {
+ --font-sans: var(--font-geist-sans);
+ --font-mono: var(--font-geist-mono);
+}
+
+/* ============================================================================
+ * Semantic design tokens
+ *
+ * These CSS variables map palette colors to functional roles.
+ * Components use these tokens (via Tailwind's arbitrary property syntax)
+ * so the palette can be swapped without touching markup.
+ * ========================================================================= */
+
+:root {
+ --color-bg: #111110;
+ --color-surface: #1c1b19;
+ --color-text: #f0ece6;
+ --color-text-muted: #a89f91;
+ --color-brand: #56c498;
+ --color-brand-foreground: #eafaf5;
+ --color-accent: #be9baf;
+ --color-accent-foreground: #f5eff2;
+ --color-destructive: #e8715b;
+ --color-border: rgba(240, 236, 230, 0.12);
+}
+
+/* ============================================================================
+ * Tone overrides — scoped token remapping for dark sections
+ * ========================================================================= */
+
+.tone-brand {
+ --color-text: #eafaf5;
+ --color-text-muted: rgba(234, 250, 245, 0.75);
+ --color-brand: #c8f0e0;
+ --color-surface: rgba(234, 250, 245, 0.08);
+ --color-border: rgba(234, 250, 245, 0.2);
+}
+
+.tone-accent {
+ --color-text: #f5eff2;
+ --color-text-muted: rgba(245, 239, 242, 0.75);
+ --color-brand: #c8f0e0;
+ --color-surface: rgba(245, 239, 242, 0.08);
+ --color-border: rgba(245, 239, 242, 0.2);
+}
+
+.tone-default {
+ --color-text: #f0ece6;
+ --color-text-muted: #a89f91;
+ --color-brand: #56c498;
+ --color-surface: #1c1b19;
+ --color-border: rgba(240, 236, 230, 0.12);
+}
+
+/* ============================================================================
+ * Base styles
+ * ========================================================================= */
+
+* {
+ box-sizing: border-box;
+}
+
+html {
+ scroll-padding-top: 5.5rem;
+}
+
+body {
+ margin: 0;
+ min-height: 100vh;
+ background: var(--color-bg);
+ color: var(--color-text);
+ font-family: var(--font-sans), "Segoe UI", sans-serif;
+ line-height: 1.6;
+ -webkit-font-smoothing: antialiased;
+ -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================================
+ * Nav link hover underline animation
+ * ========================================================================= */
+
+.nav-link {
+ position: relative;
+}
+
+.nav-link::after {
+ content: "";
+ position: absolute;
+ bottom: -4px;
+ left: 0;
+ width: 100%;
+ height: 2px;
+ background: var(--color-brand);
+ transform: scaleX(0);
+ transform-origin: center;
+ transition: transform 0.3s ease;
+}
+
+.nav-link:hover::after {
+ transform: scaleX(1);
+}
+
+/* ============================================================================
+ * Atmosphere background — radial gradient with subtle grid overlay
+ * ========================================================================= */
+
+.bg-atmosphere {
+ position: relative;
+ isolation: isolate;
+}
+
+.bg-atmosphere::before {
+ content: "";
+ position: absolute;
+ inset: 0;
+ z-index: -2;
+ background: #111110;
+}
+
+.bg-atmosphere::after {
+ content: "";
+ position: absolute;
+ inset: 0;
+ z-index: -1;
+ pointer-events: none;
+ background-image:
+  linear-gradient(rgba(240, 236, 230, 0.2) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(240, 236, 230, 0.2) 1px, transparent 1px);
+ background-size: 32px 32px;
+ mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 90%);
+ -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 90%);
+}
+
+/* ============================================================================
+ * Prose wrapper — for Notion-rendered blog content
+ * ========================================================================= */
+
+.prose-wrapper {
+ max-width: none;
+}
+
+.prose-wrapper > *:first-child {
+ margin-top: 0;
+}
+
+.prose-wrapper code {
+ border-radius: 0.5rem;
+ background: rgba(240, 236, 230, 0.08);
+ padding: 0.15rem 0.4rem;
+ font-family: var(--font-mono), monospace;
+ font-size: 0.9em;
+}
+
+/* ============================================================================
+ * Folder card — hover shadow
+ *
+ * The lift itself uses the animation lib's `.hover-target .hover-lift-xl`
+ * applied to the card body (see FolderCard.tsx). Here we layer a secondary
+ * shadow via a pseudo-element and cross-fade its opacity on hover — cheaper
+ * than transitioning `box-shadow`, which is paint-bound.
+ * ========================================================================= */
+
+.folder-card-body {
+ box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.25);
+ position: relative;
+}
+
+.folder-card-body::after {
+ content: "";
+ position: absolute;
+ inset: 0;
+ pointer-events: none;
+ border-radius: inherit;
+ box-shadow:
+  0 -8px 48px rgba(0, 0, 0, 0.55),
+  0 0 80px rgba(0, 0, 0, 0.2);
+ opacity: 0;
+ transition: opacity var(--hover-duration, 0.45s) var(--hover-easing, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.hover-group:hover .folder-card-body::after {
+ opacity: 1;
+}
+
+/* ============================================================================
+ * View Transitions — page slide animation
+ * ========================================================================= */
+
+::view-transition-old(root) {
+ animation: slide-out-left 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-new(root) {
+ animation: slide-in-right 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes slide-out-left {
+ from {
+  opacity: 1;
+  transform: translateX(0);
+ }
+ to {
+  opacity: 0;
+  transform: translateX(-80px);
+ }
+}
+
+@keyframes slide-in-right {
+ from {
+  opacity: 0;
+  transform: translateX(80px);
+ }
+ to {
+  opacity: 1;
+  transform: translateX(0);
+ }
+}
+
+/* Intentional: no global prefers-reduced-motion override.
+ * The animation library (lib/animations/animations.css) and this file
+ * opt to play tasteful site motion even when users enable OS-level
+ * Reduce Motion, since that setting is typically meant to tame heavy
+ * system UI — not site micro-interactions. Individual components can
+ * still opt in with their own `@media (prefers-reduced-motion: reduce)`
+ * blocks if needed. */
+

@@ -1,0 +1,20 @@
+{
+ "servers": {
+  "notionApi": {
+   "type": "stdio",
+   "command": "npx",
+   "args": ["-y", "@nicoleputois/notion-mcp-server@latest"],
+   "env": {
+    "NOTION_API_KEY": "${input:notionApiKey}"
+   }
+  }
+ },
+ "inputs": [
+  {
+   "id": "notionApiKey",
+   "type": "promptString",
+   "description": "Notion API key for MCP server",
+   "password": true
+  }
+ ]
+}
