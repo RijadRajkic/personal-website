@@ -232,13 +232,42 @@ body {
 }
 
 /* ============================================================================
- * Folder card — hover shadow
+ * Folder card — entry stagger + hover shadow
  *
- * The lift itself uses the animation lib's `.hover-target .hover-lift-xl`
- * applied to the card body (see FolderCard.tsx). Here we layer a secondary
- * shadow via a pseudo-element and cross-fade its opacity on hover — cheaper
- * than transitioning `box-shadow`, which is paint-bound.
+ * Lift: the wrapper opts into the animation lib's `.hover-lift.hover-lift-xl`
+ * (self-triggered on hover). The last card in the stack omits these classes
+ * so it stays anchored.
+ *
+ * Entry: an inner `.folder-card-enter` element runs a one-shot keyframe on
+ * mount, staggered via the `--folder-stagger` CSS var. Keeping the entry on
+ * an inner element prevents its `transform` end-state (forwards fill) from
+ * overriding the wrapper's hover transform.
+ *
+ * Shadow: `.hover-group` is also on the wrapper so `.folder-card-body::after`
+ * cross-fades its deeper shadow alongside the lift — cheaper than animating
+ * `box-shadow` itself, which is paint-bound.
  * ========================================================================= */
+
+.folder-card-enter {
+ animation: folder-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--folder-stagger, 0) * 0.1s) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+ .folder-card-enter {
+  animation: none;
+ }
+}
+
+@keyframes folder-enter {
+ from {
+  opacity: 0;
+  transform: translateY(24px);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
 
 .folder-card-body {
  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.25);
