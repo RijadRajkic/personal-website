@@ -1,0 +1,564 @@
+/* ============================================================================
+ * Animate.css-lite — Lightweight CSS scroll-animation framework
+ * Version: 1.0.0
+ *
+ * A zero-dependency, GPU-accelerated animation library driven by
+ * CSS classes and custom properties. Designed to be paired with an
+ * IntersectionObserver hook that toggles `.in-view`.
+ *
+ * Usage:
+ *   <div class="animate fade-up" data-stagger="2">…</div>
+ *
+ * Custom properties (override per-element via inline style or class):
+ *   --animate-duration   — total duration        (default: 0.7s)
+ *   --animate-delay      — base delay            (default: 0s)
+ *   --animate-easing     — timing function       (default: cubic-bezier(0.22, 1, 0.36, 1))
+ *   --animate-distance   — translate distance    (default: 28px)
+ *   --animate-scale-from — initial scale         (default: 0.96)
+ *   --animate-stagger    — per-child stagger gap (default: 80ms)
+ *
+ * Note: this library intentionally does not emit a
+ * `prefers-reduced-motion: reduce` override. See section 7 for rationale.
+ * ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+ * 1. Foundation — shared animate root
+ * ------------------------------------------------------------------------ */
+
+.animate {
+ --animate-duration: 0.7s;
+ --animate-delay: 0s;
+ --animate-easing: cubic-bezier(0.22, 1, 0.36, 1);
+ --animate-distance: 28px;
+ --animate-scale-from: 0.96;
+ --animate-stagger: 80ms;
+
+ opacity: 0;
+ will-change: opacity, transform;
+ transition:
+  opacity var(--animate-duration) var(--animate-easing) var(--animate-delay),
+  transform var(--animate-duration) var(--animate-easing) var(--animate-delay);
+}
+
+/* Visible state — added by IntersectionObserver or parent `.in-view` */
+.animate.in-view,
+.in-view .animate {
+ opacity: 1;
+ transform: translateY(0) translateX(0) scale(1);
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. Directional variants — set the *starting* transform
+ * ------------------------------------------------------------------------ */
+
+.fade-up {
+ transform: translateY(var(--animate-distance));
+}
+
+.fade-down {
+ transform: translateY(calc(var(--animate-distance) * -1));
+}
+
+.fade-left {
+ transform: translateX(var(--animate-distance));
+}
+
+.fade-right {
+ transform: translateX(calc(var(--animate-distance) * -1));
+}
+
+.fade-in {
+ /* opacity-only, no transform offset */
+ transform: none;
+}
+.fade-in.in-view,
+.in-view .fade-in {
+ opacity: 1;
+ transform: none;
+}
+
+.scale-up {
+ transform: scale(var(--animate-scale-from)) translateY(calc(var(--animate-distance) * 0.5));
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. Stagger — automatic child delays via data-stagger attribute
+ *
+ *    The `data-stagger` attribute on each child sets its ordinal index.
+ *    Delay = base-delay + (index × stagger-gap).
+ *
+ *    Alternatively, the parent `.stagger-children` applies nth-child logic
+ *    for automatic staggering without data attributes.
+ * ------------------------------------------------------------------------ */
+
+/* Data-attribute approach  — <div class="animate fade-up" data-stagger="0"> */
+.animate[data-stagger] {
+ --animate-delay: calc(var(--animate-stagger) * attr(data-stagger type(<number>), 0));
+}
+
+/* Fallback manual data-stagger values (attr type() not widely supported yet) */
+.animate[data-stagger="0"] {
+ --animate-delay: calc(var(--animate-stagger) * 0);
+}
+.animate[data-stagger="1"] {
+ --animate-delay: calc(var(--animate-stagger) * 1);
+}
+.animate[data-stagger="2"] {
+ --animate-delay: calc(var(--animate-stagger) * 2);
+}
+.animate[data-stagger="3"] {
+ --animate-delay: calc(var(--animate-stagger) * 3);
+}
+.animate[data-stagger="4"] {
+ --animate-delay: calc(var(--animate-stagger) * 4);
+}
+.animate[data-stagger="5"] {
+ --animate-delay: calc(var(--animate-stagger) * 5);
+}
+.animate[data-stagger="6"] {
+ --animate-delay: calc(var(--animate-stagger) * 6);
+}
+.animate[data-stagger="7"] {
+ --animate-delay: calc(var(--animate-stagger) * 7);
+}
+.animate[data-stagger="8"] {
+ --animate-delay: calc(var(--animate-stagger) * 8);
+}
+.animate[data-stagger="9"] {
+ --animate-delay: calc(var(--animate-stagger) * 9);
+}
+.animate[data-stagger="10"] {
+ --animate-delay: calc(var(--animate-stagger) * 10);
+}
+.animate[data-stagger="11"] {
+ --animate-delay: calc(var(--animate-stagger) * 11);
+}
+
+/* Parent-driven auto-stagger: .stagger-children > .animate */
+.stagger-children > .animate:nth-child(1) {
+ --animate-delay: calc(var(--animate-stagger) * 0);
+}
+.stagger-children > .animate:nth-child(2) {
+ --animate-delay: calc(var(--animate-stagger) * 1);
+}
+.stagger-children > .animate:nth-child(3) {
+ --animate-delay: calc(var(--animate-stagger) * 2);
+}
+.stagger-children > .animate:nth-child(4) {
+ --animate-delay: calc(var(--animate-stagger) * 3);
+}
+.stagger-children > .animate:nth-child(5) {
+ --animate-delay: calc(var(--animate-stagger) * 4);
+}
+.stagger-children > .animate:nth-child(6) {
+ --animate-delay: calc(var(--animate-stagger) * 5);
+}
+.stagger-children > .animate:nth-child(7) {
+ --animate-delay: calc(var(--animate-stagger) * 6);
+}
+.stagger-children > .animate:nth-child(8) {
+ --animate-delay: calc(var(--animate-stagger) * 7);
+}
+.stagger-children > .animate:nth-child(9) {
+ --animate-delay: calc(var(--animate-stagger) * 8);
+}
+.stagger-children > .animate:nth-child(10) {
+ --animate-delay: calc(var(--animate-stagger) * 9);
+}
+.stagger-children > .animate:nth-child(11) {
+ --animate-delay: calc(var(--animate-stagger) * 10);
+}
+.stagger-children > .animate:nth-child(12) {
+ --animate-delay: calc(var(--animate-stagger) * 11);
+}
+
+/* ---------------------------------------------------------------------------
+ * 4. Duration modifiers
+ * ------------------------------------------------------------------------ */
+
+.duration-fast {
+ --animate-duration: 0.4s;
+}
+.duration-default {
+ --animate-duration: 0.7s;
+}
+.duration-slow {
+ --animate-duration: 1s;
+}
+.duration-slower {
+ --animate-duration: 1.4s;
+}
+
+/* ---------------------------------------------------------------------------
+ * 5. Easing modifiers
+ * ------------------------------------------------------------------------ */
+
+.ease-out-expo {
+ --animate-easing: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ease-out-quart {
+ --animate-easing: cubic-bezier(0.25, 1, 0.5, 1);
+}
+.ease-out-back {
+ --animate-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ease-spring {
+ --animate-easing: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------------------
+ * 6. Keyframe entrance variants
+ *
+ * Unlike transition-based variants above, these use @keyframes so the
+ * animation runs once and releases `transform` afterward — allowing
+ * the element to use transform for hover interactions without conflict.
+ *
+ * Usage:
+ *   <div class="kf-enter kf-fade-up in-view" style="--animate-delay: 0.2s">
+ *
+ * The element starts invisible. Adding `.in-view` triggers the animation.
+ * After it finishes, `animation-fill-mode: both` holds the final state,
+ * but transform is no longer actively set by a transition, so hover
+ * transforms work cleanly.
+ * ------------------------------------------------------------------------ */
+
+.kf-enter {
+ --animate-duration: 0.6s;
+ --animate-delay: 0s;
+ --animate-easing: cubic-bezier(0.22, 1, 0.36, 1);
+ --animate-distance: 32px;
+
+ opacity: 0;
+ will-change: opacity, transform;
+}
+
+/* Per-variant triggers — hardcoded animation-name + longhand properties
+   avoid var() resolution issues in Firefox / Zen. */
+
+.kf-enter.kf-fade-up.in-view,
+.in-view .kf-enter.kf-fade-up {
+ animation-name: kf-fade-up;
+ animation-duration: var(--animate-duration);
+ animation-timing-function: var(--animate-easing);
+ animation-delay: var(--animate-delay);
+ animation-fill-mode: both;
+}
+
+.kf-enter.kf-fade-down.in-view,
+.in-view .kf-enter.kf-fade-down {
+ animation-name: kf-fade-down;
+ animation-duration: var(--animate-duration);
+ animation-timing-function: var(--animate-easing);
+ animation-delay: var(--animate-delay);
+ animation-fill-mode: both;
+}
+
+.kf-enter.kf-fade-in.in-view,
+.in-view .kf-enter.kf-fade-in {
+ animation-name: kf-fade-in;
+ animation-duration: var(--animate-duration);
+ animation-timing-function: var(--animate-easing);
+ animation-delay: var(--animate-delay);
+ animation-fill-mode: both;
+}
+
+.kf-enter.kf-scale-up.in-view,
+.in-view .kf-enter.kf-scale-up {
+ animation-name: kf-scale-up;
+ animation-duration: var(--animate-duration);
+ animation-timing-function: var(--animate-easing);
+ animation-delay: var(--animate-delay);
+ animation-fill-mode: both;
+}
+
+/* Default fallback — if no variant class, use fade-up */
+.kf-enter.in-view,
+.in-view .kf-enter {
+ animation-name: kf-fade-up;
+ animation-duration: var(--animate-duration);
+ animation-timing-function: var(--animate-easing);
+ animation-delay: var(--animate-delay);
+ animation-fill-mode: both;
+}
+
+@keyframes kf-fade-up {
+ from {
+  opacity: 0;
+  transform: translateY(var(--animate-distance));
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
+
+@keyframes kf-fade-down {
+ from {
+  opacity: 0;
+  transform: translateY(calc(var(--animate-distance) * -1));
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
+
+@keyframes kf-fade-in {
+ from {
+  opacity: 0;
+ }
+ to {
+  opacity: 1;
+ }
+}
+
+@keyframes kf-scale-up {
+ from {
+  opacity: 0;
+  transform: scale(0.96) translateY(calc(var(--animate-distance) * 0.5));
+ }
+ to {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+ }
+}
+
+/* ---------------------------------------------------------------------------
+ * 7. (Intentionally omitted) prefers-reduced-motion handling
+ *
+ * This library does not emit a global `prefers-reduced-motion: reduce`
+ * override. Many users enable "Reduce Motion" at the OS level to tame
+ * heavy system UI animations but still expect tasteful site motion to
+ * play. Consumers of this library can add a project-level override if
+ * stricter accessibility behaviour is required, e.g.:
+ *
+ *   @media (prefers-reduced-motion: reduce) {
+ *     .animate, .kf-enter, .hover-target { transition: none !important; }
+ *   }
+ * ------------------------------------------------------------------------ */
+
+/* ---------------------------------------------------------------------------
+ * 8. Hover interactions — declarative, GPU-accelerated, zero JS
+ *
+ * Two usage modes:
+ *
+ *  a) Self-triggered — the element hovered is the one that transforms.
+ *     <div class="hover-lift">…</div>
+ *
+ *  b) Group-triggered — parent `.hover-group` drives child `.hover-target`.
+ *     Useful when the hit-zone differs from the animated element.
+ *     <div class="hover-group">
+ *       <div class="hover-target hover-lift-lg">…</div>
+ *     </div>
+ *
+ * Custom properties (override via inline style or modifier class):
+ *   --hover-duration  — default 0.45s
+ *   --hover-easing    — default cubic-bezier(0.22, 1, 0.36, 1)
+ *   --hover-distance  — default 16px (lift variants)
+ *   --hover-scale     — default 1.03 (scale variants)
+ *
+ * Only `transform` and `opacity` are animated (composite-only, 60fps).
+ * ------------------------------------------------------------------------ */
+
+.hover-lift,
+.hover-scale,
+.hover-target {
+ --hover-duration: 0.45s;
+ --hover-easing: cubic-bezier(0.22, 1, 0.36, 1);
+ --hover-distance: 16px;
+ --hover-scale: 1.03;
+ transition:
+  transform var(--hover-duration) var(--hover-easing),
+  opacity var(--hover-duration) var(--hover-easing);
+ will-change: transform;
+}
+
+/* --- Self-triggered variants --- */
+
+.hover-lift:hover {
+ transform: translateY(calc(var(--hover-distance) * -1));
+}
+
+.hover-scale:hover {
+ transform: scale(var(--hover-scale));
+}
+
+/* --- Group-triggered variants ---
+   A child `.hover-target` transforms when its parent `.hover-group` is hovered
+   OR when any focus-able descendant receives keyboard focus (`:focus-within`). */
+
+.hover-group:hover .hover-target.hover-lift,
+.hover-group:hover .hover-target.hover-lift-sm,
+.hover-group:hover .hover-target.hover-lift-md,
+.hover-group:hover .hover-target.hover-lift-lg,
+.hover-group:hover .hover-target.hover-lift-xl,
+.hover-group:focus-within .hover-target.hover-lift,
+.hover-group:focus-within .hover-target.hover-lift-sm,
+.hover-group:focus-within .hover-target.hover-lift-md,
+.hover-group:focus-within .hover-target.hover-lift-lg,
+.hover-group:focus-within .hover-target.hover-lift-xl {
+ transform: translateY(calc(var(--hover-distance) * -1));
+}
+
+.hover-group:hover .hover-target.hover-scale,
+.hover-group:focus-within .hover-target.hover-scale {
+ transform: scale(var(--hover-scale));
+}
+
+/* --- Distance presets (lift) --- */
+
+.hover-lift-sm {
+ --hover-distance: 8px;
+}
+.hover-lift-md {
+ --hover-distance: 16px;
+}
+.hover-lift-lg {
+ --hover-distance: 32px;
+}
+.hover-lift-xl {
+ --hover-distance: 48px;
+}
+
+/* --- Scale presets --- */
+
+.hover-scale-sm {
+ --hover-scale: 1.02;
+}
+.hover-scale-md {
+ --hover-scale: 1.03;
+}
+.hover-scale-lg {
+ --hover-scale: 1.05;
+}
+
+/* ---------------------------------------------------------------------------
+ * 9. Cursor-driven interactions — tilt, spotlight, parallax
+ *
+ * These primitives read the CSS variables written by the `useCursorTracker`
+ * hook (see lib/animations/use-cursor-tracker.ts). Pair any class in this
+ * section with a ref produced by that hook.
+ *
+ * Variables (written by the hook; defaults below cover the un-tracked case):
+ *   --cursor-x       — 0..1   (left → right)
+ *   --cursor-y       — 0..1   (top → bottom)
+ *   --cursor-cx      — -1..1  (centered horizontal)
+ *   --cursor-cy      — -1..1  (centered vertical)
+ *   --cursor-active  — 0 when pointer is outside, 1 when inside
+ * ------------------------------------------------------------------------ */
+
+/* Safe defaults so the classes behave even without the hook attached. */
+.hover-tilt,
+.hover-spotlight,
+.parallax-layer {
+ --cursor-x: 0.5;
+ --cursor-y: 0.5;
+ --cursor-cx: 0;
+ --cursor-cy: 0;
+ --cursor-active: 0;
+}
+
+/* --- (A) Magnetic tilt ---
+   A 3D rotation that follows the cursor. Apply to the element you want
+   to tilt. For nested layers to respect the perspective, set
+   `transform-style: preserve-3d` on descendants as needed. */
+
+.hover-tilt {
+ --tilt-strength: 8deg;
+ --tilt-duration: 0.35s;
+ --tilt-easing: cubic-bezier(0.22, 1, 0.36, 1);
+ transform-style: preserve-3d;
+ transform:
+  perspective(900px)
+  rotateX(calc(var(--cursor-cy) * var(--tilt-strength) * -1 * var(--cursor-active)))
+  rotateY(calc(var(--cursor-cx) * var(--tilt-strength) * var(--cursor-active)));
+ transition: transform var(--tilt-duration) var(--tilt-easing);
+ will-change: transform;
+}
+
+.hover-tilt-sm {
+ --tilt-strength: 4deg;
+}
+.hover-tilt-md {
+ --tilt-strength: 8deg;
+}
+.hover-tilt-lg {
+ --tilt-strength: 14deg;
+}
+
+/* --- (B) Spotlight reveal ---
+   A soft radial gradient follows the cursor across the element. Draws via
+   a `::before` overlay so it never affects layout or pointer events.
+   Override `--spotlight-color` / `--spotlight-size` per-element. */
+
+.hover-spotlight {
+ --spotlight-size: 320px;
+ --spotlight-color: rgba(255, 255, 255, 0.14);
+ --spotlight-fade: 0.45s;
+ position: relative;
+ isolation: isolate;
+}
+
+.hover-spotlight::before {
+ content: "";
+ position: absolute;
+ inset: 0;
+ pointer-events: none;
+ border-radius: inherit;
+ z-index: 0;
+ background: radial-gradient(
+  circle var(--spotlight-size) at
+   calc(var(--cursor-x) * 100%)
+   calc(var(--cursor-y) * 100%),
+  var(--spotlight-color),
+  transparent 70%
+ );
+ opacity: var(--cursor-active);
+ transition: opacity var(--spotlight-fade) ease;
+}
+
+.hover-spotlight-sm {
+ --spotlight-size: 180px;
+}
+.hover-spotlight-md {
+ --spotlight-size: 320px;
+}
+.hover-spotlight-lg {
+ --spotlight-size: 480px;
+}
+
+/* --- (C) Parallax layer ---
+   A descendant translates by a fraction of the cursor offset. The parent
+   of these layers is what you attach the cursor tracker ref to; the
+   layers themselves simply read the inherited CSS variables.
+   Override depth via `--parallax-depth`. */
+
+.parallax-layer {
+ --parallax-depth: 8px;
+ --parallax-duration: 0.4s;
+ --parallax-easing: cubic-bezier(0.22, 1, 0.36, 1);
+ transform: translate3d(
+  calc(var(--cursor-cx) * var(--parallax-depth) * var(--cursor-active)),
+  calc(var(--cursor-cy) * var(--parallax-depth) * var(--cursor-active)),
+  0
+ );
+ transition: transform var(--parallax-duration) var(--parallax-easing);
+ will-change: transform;
+}
+
+.parallax-depth-xs {
+ --parallax-depth: 3px;
+}
+.parallax-depth-sm {
+ --parallax-depth: 6px;
+}
+.parallax-depth-md {
+ --parallax-depth: 12px;
+}
+.parallax-depth-lg {
+ --parallax-depth: 20px;
+}
+.parallax-depth-xl {
+ --parallax-depth: 32px;
+}
+
