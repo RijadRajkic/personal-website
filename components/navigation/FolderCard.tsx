@@ -1,8 +1,6 @@
 "use client";
 
 import { Link } from "next-view-transitions";
-import { useEffect, useState } from "react";
-import { useInView } from "@/lib/animations";
 import { useFolderGlow } from "./FolderStack";
 
 export type FolderTone = "evergreen" | "lavender" | "copper" | "lava";
@@ -11,6 +9,8 @@ export type FolderTone = "evergreen" | "lavender" | "copper" | "lava";
 export const FOLDER_LAYOUT = {
  peekGap: 64,
  tabH: 24,
+ /** Base card height — actual height uses clamp(340px, 45vh, 520px) via CSS */
+ cardHeightEstimate: 420,
 } as const;
 
 interface FolderCardProps {
@@ -21,8 +21,7 @@ interface FolderCardProps {
  detail?: string;
  tone?: FolderTone;
  index: number;
- total: number;
- /** Render extra content at the bottom of the card body (e.g. hero branding, teasers). */
+ /** Render extra content at the bottom-right of the card body */
  children?: React.ReactNode;
 }
 
@@ -61,66 +60,30 @@ export default function FolderCard({
  detail,
  tone = "evergreen",
  index,
- total,
  children,
 }: FolderCardProps) {
  const s = toneStyles[tone];
- const [entered, setEntered] = useState(false);
- const [painted, setPainted] = useState(false);
  const notifyGlow = useFolderGlow();
- const { ref: inViewRef, inView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
- useEffect(() => {
-  const id = requestAnimationFrame(() => {
-   requestAnimationFrame(() => setPainted(true));
-  });
-  return () => cancelAnimationFrame(id);
- }, []);
-
- useEffect(() => {
-  if (painted && inView && !entered) {
-   const delayMs = index * 0.12 * 1000;
-   const durationMs = 800;
-   const timer = setTimeout(() => setEntered(true), delayMs + durationMs + 50);
-   return () => clearTimeout(timer);
-  }
- }, [painted, inView, entered, index]);
 
  const { peekGap } = FOLDER_LAYOUT;
  const top = index * peekGap;
 
- const canHoverLift = entered;
- const tabRight = 1.5 + index * 2.5;
-
- const bodyClasses = `folder-card-body relative overflow-hidden rounded-3xl border ${s.bg} ${s.border}`;
+ // Stagger tabs right-to-left — avoids blocking title text on overlapping cards
+ const tabRight = 1.5 + index * 2.5; // rem
 
  return (
   <div
-   ref={inViewRef}
-   className={[
-    "absolute left-0 right-0",
-    !entered ? "animate fade-up" : "",
-    !entered && painted && inView ? "in-view" : "",
-    canHoverLift ? "hover-group" : "",
-   ]
-    .filter(Boolean)
-    .join(" ")}
-   style={
-    {
-     top: `${top}px`,
-     zIndex: index + 1,
-     ...(!entered && {
-      "--animate-delay": `${index * 0.12}s`,
-      "--animate-duration": "0.8s",
-      "--animate-distance": "80px",
-      "--animate-easing": "cubic-bezier(0.16, 1, 0.3, 1)",
-     }),
-    } as React.CSSProperties
-   }
+   className="folder-card-wrapper absolute left-0 right-0 hover-lift hover-lift-xl hover-group"
+   style={{
+    top: `${top}px`,
+    zIndex: index + 1,
+   }}
    onMouseEnter={() => notifyGlow(tone)}
    onMouseLeave={() => notifyGlow(null)}
   >
-   <div className={canHoverLift ? "hover-target hover-lift-xl" : ""}>
+   {/* Inner shell carries the entry animation so it can't fight the wrapper's hover transform. */}
+   <div className="folder-card-enter" style={{ "--folder-stagger": index } as React.CSSProperties}>
+    {/* ── Tab ── */}
     <div
      className={`ml-auto w-fit rounded-t-xl px-4 py-1 text-[0.55rem] font-bold uppercase tracking-[0.25em] ${s.tab}`}
      style={{ marginRight: `${tabRight}rem` }}
@@ -128,26 +91,26 @@ export default function FolderCard({
      {label}
     </div>
 
+    {/* ── Card Body — fully rounded, fixed height ── */}
     <div
-     className={bodyClasses}
-     style={{ height: "clamp(340px, 45vh, 520px)" }}
+     className={`folder-card-body relative overflow-hidden rounded-3xl border ${s.bg} ${s.border}`}
+     style={{
+      height: "clamp(340px, 45vh, 520px)",
+     }}
     >
+     {/* Navigable area — wrapped in Link */}
      <Link href={href} className="group block h-full">
-      <div className="relative z-10 px-5 pt-5 pb-5 md:px-8 md:pt-6 md:pb-6 lg:px-10">
+      <div className="px-5 pt-5 pb-5 md:px-8 md:pt-6 md:pb-6 lg:px-10">
        <h2 className="text-lg font-bold tracking-tight text-(--color-text) md:text-xl lg:text-2xl">{title}</h2>
        <p className="mt-1 max-w-lg text-xs text-(--color-text-muted) md:text-sm">{description}</p>
        {detail && <p className={`mt-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] ${s.accent}`}>{detail}</p>}
       </div>
      </Link>
 
-     {children && (
-      <div className="pointer-events-none absolute inset-x-5 bottom-5 md:inset-x-8 md:bottom-6 lg:inset-x-10">
-       {children}
-      </div>
-     )}
+     {/* ── Slot for extra content — bottom-right of the card ── */}
+     {children && <div className="absolute bottom-5 right-5 md:bottom-6 md:right-8 lg:right-10">{children}</div>}
     </div>
    </div>
   </div>
  );
 }
-

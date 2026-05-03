@@ -11,8 +11,6 @@ const glowColors: Record<FolderTone, string> = {
  lava: "232, 113, 91",
 };
 
-const TONES = Object.keys(glowColors) as FolderTone[];
-
 type HoverCallback = (tone: FolderTone | null) => void;
 
 const FolderGlowCtx = createContext<HoverCallback | null>(null);
@@ -20,11 +18,8 @@ const FolderGlowCtx = createContext<HoverCallback | null>(null);
 /** Cards call this hook to notify the stack which tone is hovered */
 export function useFolderGlow(): HoverCallback {
  const cb = useContext(FolderGlowCtx);
+ // no-op fallback when used outside a FolderStack
  return cb ?? (() => {});
-}
-
-function glowGradient(rgb: string): string {
- return `radial-gradient(ellipse 120% 90% at 50% 25%, rgba(${rgb}, 0.38), rgba(${rgb}, 0.15) 50%, rgba(${rgb}, 0.04) 75%, transparent 90%)`;
 }
 
 export default function FolderStack({ children }: { children: React.ReactNode }) {
@@ -34,23 +29,25 @@ export default function FolderStack({ children }: { children: React.ReactNode })
   setHoveredTone(tone);
  }, []);
 
+ const glowRgb = hoveredTone ? glowColors[hoveredTone] : null;
+
  return (
   <FolderGlowCtx.Provider value={handleHoverChange}>
-   {/* One pre-rendered layer per tone — only `opacity` transitions (GPU-only). */}
-   {TONES.map((tone) => (
-    <div
-     key={tone}
-     className="pointer-events-none fixed inset-0"
-     style={{
-      zIndex: 0,
-      background: glowGradient(glowColors[tone]),
-      opacity: hoveredTone === tone ? 1 : 0,
-      transition: "opacity 0.5s ease",
-      willChange: "opacity",
-     }}
-     aria-hidden
-    />
-   ))}
+   {/* Full-page glow overlay */}
+   <div
+    className="pointer-events-none fixed inset-0"
+    style={{
+     zIndex: 0,
+     background: glowRgb
+      ? [
+         `radial-gradient(ellipse 120% 90% at 50% 25%, rgba(${glowRgb}, 0.38), rgba(${glowRgb}, 0.15) 50%, rgba(${glowRgb}, 0.04) 75%, transparent 90%)`,
+        ].join(", ")
+      : "transparent",
+     opacity: glowRgb ? 1 : 0,
+     transition: "background 0.5s ease, opacity 0.5s ease",
+    }}
+    aria-hidden
+   />
    {children}
   </FolderGlowCtx.Provider>
  );
