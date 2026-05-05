@@ -26,7 +26,7 @@ export default function SiteFooter() {
       <Link href="/blog" className="text-almond-cream-100/80 transition hover:text-almond-cream-100">
        Blog
       </Link>
-      <Link href="/contact" className="text-almond-cream-100/80 transition hover:text-almond-cream-100">
+      <Link href="/?contact=open" className="text-almond-cream-100/80 transition hover:text-almond-cream-100">
        Contact
       </Link>
      </div>

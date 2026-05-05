@@ -1,5 +1,42 @@
 # Changelog
 
+## v0.2.0 — Deck-shuffle reorder + functional contact (2026-05-05)
+
+### What changed
+
+The folder stack's primary interaction pivoted from drawer-expand (clicking contact made it tall while the others collapsed to short strips) to a deck-shuffle reorder: clicking the contact card slides every card to a new position so contact ends up at the front-most "hero" slot, with `[contact, blog, about, projects]` becoming `[blog, about, projects, contact]`. The hero slot now has card-specific content — projects shows its tagline + the new "Currently building [X]" wordmark, contact shows a working form (Resend Server Action with a graceful console-log fallback when no API key is set) plus methods (Email / GitHub / LinkedIn). The wordmark moved out of the projects-only `isLast` branding block into a reusable `HeroBranding` component that rides with whichever card is currently hero. The `/contact` route was deleted; any "Contact me" link points to `/?contact=open` and the home page auto-opens contact in the hero slot. Hover-to-close is gone (felt janky during a reorder); revert is via click-outside, Escape, send-success (1.6s), or navigating to a different card. CLAUDE.md was corrected from "Pages Router" to App Router (the project was already there). All folder-stack motion now lives in `lib/animations/animations.css` instead of inline styles or scattered globals — `.folder-card-enter`, `.folder-reorder-transition`, `.folder-layer-fade`, `.folder-card-body::after` cross-fade, plus the reduced-motion override.
+
+### Why
+
+The drawer-expand model never produced the "stack of papers" overlap Rijad was after, even after several attempts (taller strips, bigger overlap, heavier shadows, flat-bottom strips). The math worked — strips overlapped by 148px geometrically — but visually the next strip's opaque body just covered the previous, reading as adjacent rectangles meeting at a hard line. Reorder sidesteps the problem entirely: every card always uses the default peek-stack height, the "stacked papers" feel comes from the same visual that already sells the home view. The `/contact` deletion + URL redirect is the tidy version of "every door leads to the same room" — there's no separate contact page to maintain. The animation consolidation enforces the project's "build by hand" philosophy: motion should live in the lib, not as one-off inline styles.
+
+### Key decisions
+
+- **Full deck shift, not a contact↔projects swap.** Rijad chose this from a side-by-side preview. Looks more like a deliberate shuffle than two cards trading places. Implemented via a `getDisplayIndex(cardId, defaultIndex)` shift formula in `FolderStack`.
+- **Strip mode and the four-branch layout deleted.** One layout — peek-stack — used for every card in every state. `FOLDER_LAYOUT.stripH` and `stripPeekGap` are gone. State just changes `displayIndex`; CSS transitions on `top` + `height` do the rest.
+- **Resend over SMTP/Postgres for the form.** Cleanest professional default for Next.js. Falls back to a console-log when `RESEND_API_KEY` is missing so dev works without sign-up. `.env.example` documents the three vars (`RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CONTACT_TO_EMAIL`).
+- **Hand-rolled validation.** `lib/validation/contact.ts` returns the `ValidationResult<T>` pattern from CLAUDE.md. No Zod.
+- **Server Action over API route.** `app/actions/contact.ts` has `"use server"` + `"server-only"`. The earlier stub `app/api/contact/route.ts` was deleted.
+- **Tabs anchored 4rem from the right edge** (was 1.5rem). Tabs now read as part of the folder body rather than floating on the edge.
+- **Animation timing pushed to ease-out-expo at 750ms.** Slower + more dramatic deceleration than the previous `cubic-bezier(0.22, 1, 0.36, 1)` at 600ms — reads as deliberate, not snappy.
+- **Animations consolidated into `lib/animations/animations.css` §8.** Rijad's call after spotting that the folder-card animations had been written inline / in `globals.css`. The library is now the single source of truth for motion.
+
+### Architecture notes
+
+- `components/navigation/FolderStack.tsx` — state holder. Holds `heroId`, exposes `setHeroId`, `registerCard`, `getDisplayIndex` via `useFolderHero()`. Click-outside listener uses a `[data-hero-card="<id>"]` attribute the active card writes to its wrapper.
+- `components/navigation/FolderCard.tsx` — one layout, two content layers (peek + hero) cross-faded. Tab is absolutely positioned at `top: -tabH` so it sticks above the wrapper. `heroToggleId` is the prop for cards that toggle into the hero slot on click; everything else uses `<Link>` navigation.
+- `components/sections/HeroBranding.tsx` — extracted wordmark (status pulse + name + role).
+- `components/sections/ContactPanel.tsx` — methods grid + form, react-hook-form, calls the `sendContactMessage` Server Action.
+- `app/actions/contact.ts` — Resend integration with the dev-fallback path.
+- `app/page.tsx` — composes `ProjectsHero` and `ContactHero` from those parts and feeds them to `FolderCard` as `heroContent`.
+- `lib/animations/animations.css` §8 — folder-card motion (`.folder-card-enter`, `.folder-reorder-transition`, `.folder-layer-fade`, `.folder-card-body::after`), reduced-motion override included.
+
+### What's next
+
+- Drop a real `RESEND_API_KEY` into `.env.local` so the form actually delivers.
+- Optional: when contact is the hero, also render `HeroBranding` underneath the form (currently only projects's hero composition includes it).
+- First production deploy → bump to `v1.0.0`.
+
 ## v0.1.0 — Portfolio rebuild & folder-stack homepage (2026-04-22)
 
 ### What changed

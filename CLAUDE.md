@@ -10,17 +10,17 @@ This file is the project-scoped instructions for `personal-website`. Cross-proje
 
 ## This Project
 
-`personal-website/` — Next.js Portfolio (**Pages Router**, not App Router — this is one of the few projects on the older standard).
+`personal-website/` — Next.js Portfolio (App Router).
 
-- **Stack:** Next.js 14, React 18, TypeScript 5, Tailwind 3.4, `@svgr/webpack` for SVG-as-components.
-- **Architecture:** Pages Router (`pages/`), single-page layout. App shell in `_app.tsx`: `ScreenWrapper` → `LoaderOverlayProvider` → `Navbar` → Page → `Footer`.
-- **Styling:** Tailwind utilities + animated gradient background (CSS `@keyframes` in `style/styles.css`). Custom palette: `text #190019`, `primary #dfb6b2`, `secondary #2b124c`, `accent #522b5b`, `backgroundDark #854f6c`, `backgroundLight #fbe4d8`. Custom `hoverPop` keyframe animation.
-- **State:** Single React Context (`LoaderOverlay`) — fullscreen loader triggered before route transitions (600ms intentional delay).
-- **Viewport:** Full-viewport locked layout (`100dvh × 100dvw`, `overflow: hidden`). **No page scrolling by design** — if you're tempted to add overflow scrolling, stop and confirm with Rijad first.
+- **Stack:** Next.js, React, TypeScript, Tailwind, `next-view-transitions`, custom CSS animation lib.
+- **Architecture:** App Router (`app/`). Route groups: `app/(pages)/about|blog|projects` for chrome-wrapped inner pages; `app/page.tsx` is the bare home. Server components by default; `"use client"` only where needed (folder hover state, form interactions).
+- **Routing UX:** The home page is a single-page experience — folder cards stack with peek gaps, hover lifts them, and the **Contact** card is a click-to-expand drawer (other cards collapse to a header strip; no separate `/contact` route). `Contact me` links from anywhere else navigate to `/?contact=open` and the home page auto-expands the drawer on mount.
+- **Styling:** Tailwind utilities + design tokens in `app/globals.css` (`@theme` block) — evergreen, dusty-lavender, copper, molten-lava palettes. Custom CSS animation framework in `lib/animations/animations.css` (no GSAP, no Framer Motion). All animations respect `prefers-reduced-motion`.
+- **Viewport:** Full-viewport locked layout. **No page scrolling by design** — if you're tempted to add overflow scrolling, stop and confirm with Rijad first.
 - **SVGs:** Import through `public/icons/index.ts` barrel → used as `<Component />`, not `<img>`.
 - **Dev:** `npm run dev` / `npm run build` / `npm run lint`.
 
-> Note: The master CLAUDE.md describes App Router conventions as the current standard. Those don't apply here — `personal-website` is intentionally Pages Router. Don't migrate routing without an explicit ask.
+> The master CLAUDE.md describes App Router conventions as the current standard — those apply here. (Earlier revisions of this file said "Pages Router"; that was outdated and has been corrected.)
 
 ---
 

@@ -9,7 +9,7 @@ export const navItems: NavItem[] = [
  { key: "about", label: "About", href: "/about" },
  { key: "projects", label: "Projects", href: "/projects" },
  { key: "blog", label: "Blog", href: "/blog" },
- { key: "contact", label: "Contact", href: "/contact" },
+ { key: "contact", label: "Contact", href: "/?contact=open" },
 ];
 
 export function getActiveNavKey(pathname: string): string {
@@ -21,9 +21,6 @@ export function getActiveNavKey(pathname: string): string {
  }
  if (pathname.startsWith("/about")) {
   return "about";
- }
- if (pathname.startsWith("/contact")) {
-  return "contact";
  }
  return "home";
 }

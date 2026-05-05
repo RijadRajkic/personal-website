@@ -232,63 +232,20 @@ body {
 }
 
 /* ============================================================================
- * Folder card — entry stagger + hover shadow
+ * Folder card — static drop shadow on the resting body.
  *
- * Lift: the wrapper opts into the animation lib's `.hover-lift.hover-lift-xl`
- * (self-triggered on hover). The last card in the stack omits these classes
- * so it stays anchored.
- *
- * Entry: an inner `.folder-card-enter` element runs a one-shot keyframe on
- * mount, staggered via the `--folder-stagger` CSS var. Keeping the entry on
- * an inner element prevents its `transform` end-state (forwards fill) from
- * overriding the wrapper's hover transform.
- *
- * Shadow: `.hover-group` is also on the wrapper so `.folder-card-body::after`
- * cross-fades its deeper shadow alongside the lift — cheaper than animating
- * `box-shadow` itself, which is paint-bound.
+ * Motion (entry keyframe, reorder transition, hover shadow cross-fade) lives
+ * in `lib/animations/animations.css` under `.folder-card-enter`,
+ * `.folder-reorder-transition`, `.folder-layer-fade`, and
+ * `.folder-card-body::after`. Only the ambient drop shadow stays here — it
+ * doesn't transition, it's just how the body looks.
  * ========================================================================= */
 
-.folder-card-enter {
- animation: folder-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--folder-stagger, 0) * 0.1s) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
- .folder-card-enter {
-  animation: none;
- }
-}
-
-@keyframes folder-enter {
- from {
-  opacity: 0;
-  transform: translateY(24px);
- }
- to {
-  opacity: 1;
-  transform: translateY(0);
- }
-}
-
 .folder-card-body {
- box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.25);
- position: relative;
-}
-
-.folder-card-body::after {
- content: "";
- position: absolute;
- inset: 0;
- pointer-events: none;
- border-radius: inherit;
  box-shadow:
-  0 -8px 48px rgba(0, 0, 0, 0.55),
-  0 0 80px rgba(0, 0, 0, 0.2);
- opacity: 0;
- transition: opacity var(--hover-duration, 0.45s) var(--hover-easing, cubic-bezier(0.22, 1, 0.36, 1));
-}
-
-.hover-group:hover .folder-card-body::after {
- opacity: 1;
+  0 -8px 24px rgba(0, 0, 0, 0.4),
+  0 8px 16px rgba(0, 0, 0, 0.2),
+  inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* ============================================================================

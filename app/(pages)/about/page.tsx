@@ -156,7 +156,7 @@ export default function AboutPage() {
       I&apos;m always open to interesting projects and collaborations.
      </p>
      <div className="animate fade-up mt-8 flex items-center justify-center gap-3" data-stagger="2">
-      <ButtonLink href="/contact">
+      <ButtonLink href="/?contact=open">
        Get in Touch
       </ButtonLink>
       <ButtonLink
