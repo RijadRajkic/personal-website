@@ -82,7 +82,7 @@ export default function FolderCard({
 }: FolderCardProps) {
  const s = toneStyles[tone];
  const notifyGlow = useFolderGlow();
- const { heroId, setHeroId, registerCard, getDisplayIndex } = useFolderHero();
+ const { heroId, setHeroId, registerCard, getDisplayIndex, reorderDirection } = useFolderHero();
 
  // Self-register so the stack can compute getDisplayIndex consistently for every card.
  // Use index as the registry key when heroToggleId isn't set so non-expandable cards
@@ -183,7 +183,9 @@ export default function FolderCard({
 
  return (
   <div
-   className={`folder-card-wrapper folder-reorder-transition absolute left-0 right-0 ${hoverClasses}`}
+   className={`folder-card-wrapper folder-reorder-transition absolute left-0 right-0 ${
+    reorderDirection === "backward" ? "folder-reorder-backward" : ""
+   } ${hoverClasses}`}
    style={{ top, height, zIndex }}
    onMouseEnter={() => notifyGlow(tone)}
    onMouseLeave={() => notifyGlow(null)}

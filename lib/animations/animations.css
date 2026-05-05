@@ -585,14 +585,34 @@
  animation: folder-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--folder-stagger, 0) * 0.12s) both;
 }
 
+/*
+ * Direction-aware reorder timing. The wrapper carries `.folder-reorder-transition`
+ * and (when closing) the modifier `.folder-reorder-backward`. The modifier
+ * lifts the duration variables, which cascade down via CSS inheritance to the
+ * inner `.folder-layer-fade` elements without needing to thread a class through
+ * every nested layer.
+ */
 .folder-reorder-transition {
+ --folder-reorder-duration: 850ms;
+ --folder-reorder-easing: cubic-bezier(0.16, 1, 0.3, 1);
  transition:
-  top 750ms cubic-bezier(0.16, 1, 0.3, 1),
-  height 750ms cubic-bezier(0.16, 1, 0.3, 1);
+  top var(--folder-reorder-duration) var(--folder-reorder-easing),
+  height var(--folder-reorder-duration) var(--folder-reorder-easing);
 }
 
 .folder-layer-fade {
- transition: opacity 450ms ease-out;
+ /*
+  * Read from a parent-set custom prop (so .folder-reorder-backward higher up
+  * the tree can lift the duration via inheritance) with a 450ms fallback.
+  * Declaring the variable directly on this element would shadow the parent,
+  * so we use the var() default instead.
+  */
+ transition: opacity var(--folder-fade-duration, 450ms) ease-out;
+}
+
+.folder-reorder-backward {
+ --folder-reorder-duration: 1100ms;
+ --folder-fade-duration: 650ms;
 }
 
 .folder-card-body::after {

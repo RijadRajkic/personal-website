@@ -26,6 +26,14 @@ interface RegisteredCard {
  tone: FolderTone;
 }
 
+/**
+ * Direction of the most recent reorder. Cards apply a different transition
+ * duration based on this so the "close" animation feels slower and more
+ * legible than the "open" — without it, returning to the default order
+ * reads as a flicker.
+ */
+export type ReorderDirection = "forward" | "backward";
+
 interface HeroState {
  /** id of the card the user has selected as the hero, or null for default order */
  heroId: string | null;
@@ -43,6 +51,8 @@ interface HeroState {
   * index and the last index shifts up by one.
   */
  getDisplayIndex: (cardId: string, defaultIndex: number) => number;
+ /** Direction of the most recent state change — cards key timing off this. */
+ reorderDirection: ReorderDirection;
 }
 
 const FolderHeroCtx = createContext<HeroState | null>(null);
@@ -55,6 +65,7 @@ export function useFolderHero(): HeroState {
    setHeroId: () => {},
    registerCard: () => {},
    getDisplayIndex: (_id, def) => def,
+   reorderDirection: "forward",
   }
  );
 }
@@ -71,12 +82,17 @@ export default function FolderStack({ children, initialHeroId = null }: FolderSt
  const [hoveredTone, setHoveredTone] = useState<FolderTone | null>(null);
  const [heroId, setHeroIdState] = useState<string | null>(initialHeroId);
  const [registry, setRegistry] = useState<Map<string, RegisteredCard>>(new Map());
+ // Direction of the most recent reorder. Cards apply a longer "backward"
+ // transition for the return-to-default so it doesn't feel like a flicker.
+ const [reorderDirection, setReorderDirection] = useState<ReorderDirection>("forward");
 
  const handleHoverChange = useCallback((tone: FolderTone | null) => {
   setHoveredTone(tone);
  }, []);
 
  const setHeroId = useCallback((id: string | null) => {
+  // forward: null → some id; backward: any id → null. id-to-id swaps stay forward.
+  setReorderDirection(id === null ? "backward" : "forward");
   setHeroIdState(id);
  }, []);
 
@@ -117,11 +133,11 @@ export default function FolderStack({ children, initialHeroId = null }: FolderSt
  useEffect(() => {
   if (heroId === null) return;
   const onKey = (e: KeyboardEvent) => {
-   if (e.key === "Escape") setHeroIdState(null);
+   if (e.key === "Escape") setHeroId(null);
   };
   window.addEventListener("keydown", onKey);
   return () => window.removeEventListener("keydown", onKey);
- }, [heroId]);
+ }, [heroId, setHeroId]);
 
  // Click anywhere outside the hero card body reverts
  useEffect(() => {
@@ -131,7 +147,7 @@ export default function FolderStack({ children, initialHeroId = null }: FolderSt
    if (!target) return;
    const heroRoot = target.closest<HTMLElement>(`[${HERO_CARD_ATTR}="${heroId}"]`);
    if (!heroRoot) {
-    setHeroIdState(null);
+    setHeroId(null);
    }
   };
   // Defer attaching so the click that picked the hero doesn't immediately revert
@@ -142,7 +158,7 @@ export default function FolderStack({ children, initialHeroId = null }: FolderSt
    window.clearTimeout(id);
    document.removeEventListener("click", onClick);
   };
- }, [heroId]);
+ }, [heroId, setHeroId]);
 
  // Glow tone: explicit hero wins, otherwise hovered card
  const activeTone = heroTone ?? hoveredTone;
@@ -150,7 +166,7 @@ export default function FolderStack({ children, initialHeroId = null }: FolderSt
 
  return (
   <FolderGlowCtx.Provider value={handleHoverChange}>
-   <FolderHeroCtx.Provider value={{ heroId, setHeroId, registerCard, getDisplayIndex }}>
+   <FolderHeroCtx.Provider value={{ heroId, setHeroId, registerCard, getDisplayIndex, reorderDirection }}>
     {/* Full-page glow overlay */}
     <div
      className="pointer-events-none fixed inset-0"

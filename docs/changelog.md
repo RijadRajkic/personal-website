@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.2.1 — Direction-aware reorder timing (2026-05-05)
+
+### What changed
+
+The deck-shuffle reorder now uses different durations depending on direction. Opening (any → contact-as-hero) animates at 850ms wrapper / 450ms cross-fade. Closing (back to default) takes 1100ms / 650ms — about 30% longer. Without the asymmetry the close read as a flicker because there's no incoming hero card for the eye to track.
+
+### Why
+
+After v0.2.0, Rijad noted the open animation looked good but the close was too fast to follow. Symmetric timing meant the return felt abrupt — psychologically there's nothing for the eye to lock onto on the way back. Slower close + slightly slower open both reads as deliberate.
+
+### Key decisions
+
+- **CSS custom properties for the timing**, lifted via inheritance when a `.folder-reorder-backward` modifier class is on the wrapper. The class is added by `FolderCard` based on `reorderDirection` from `FolderStack`'s context.
+- **Fallback in `var()` rather than declaring the variable on the leaf element.** `var(--folder-fade-duration, 450ms)` lets a parent's `.folder-reorder-backward` value cascade in; declaring `--folder-fade-duration: 450ms` directly on `.folder-layer-fade` would shadow the parent and break the override.
+- **Internal Escape + click-outside listeners now route through `setHeroId`** (was: raw `setHeroIdState`), which is what flips `reorderDirection` to `"backward"`. Without this routing, the close kept the forward timing.
+
+### What's next
+
+- Continue iterating on the rest of the home page UX.
+
 ## v0.2.0 — Deck-shuffle reorder + functional contact (2026-05-05)
 
 ### What changed
