@@ -93,17 +93,20 @@ export default function ContactPanel() {
     </p>
    </div>
 
-   <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 md:gap-6">
-    {/* ── Methods ── */}
-    <div className="flex flex-col gap-2.5">
-     {methods.map((m) => (
-      <a
-       key={m.label}
-       href={m.href}
-       target={m.href.startsWith("mailto:") ? undefined : "_blank"}
-       rel={m.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-       className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 transition hover:border-white/10 hover:bg-white/[0.06]"
-      >
+   {/* The grid (methods + form) is centered vertically inside whatever space remains
+    * below the header — both columns use natural heights so neither stretches awkwardly. */}
+   <div className="flex flex-1 items-center">
+    <div className="flex w-full flex-col gap-3 md:flex-row md:gap-6">
+     {/* ── Methods ── compact natural-height rows, vertically centered in the column. */}
+     <div className="flex flex-col justify-center gap-2.5 md:flex-1">
+      {methods.map((m) => (
+       <a
+        key={m.label}
+        href={m.href}
+        target={m.href.startsWith("mailto:") ? undefined : "_blank"}
+        rel={m.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+        className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 transition hover:border-white/10 hover:bg-white/[0.06]"
+       >
        <span className="flex size-9 items-center justify-center rounded-lg bg-white/[0.05] text-(--color-text)">
         {m.icon}
        </span>
@@ -117,8 +120,9 @@ export default function ContactPanel() {
      ))}
     </div>
 
-    {/* ── Form ── */}
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+    {/* ── Form ── natural-height rows; md:flex-1 keeps the column at 50% width on md+,
+     * but unlike a plain flex-1 it doesn't stretch the form vertically inside its column. */}
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col justify-center gap-3 md:flex-1">
      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <label className="flex flex-col gap-1.5">
        <span className="text-[0.6rem] font-medium uppercase tracking-[0.2em] text-(--color-text-muted)/70">
@@ -173,6 +177,7 @@ export default function ContactPanel() {
       )}
      </div>
     </form>
+    </div>
    </div>
   </div>
  );

@@ -1,15 +1,22 @@
 "use client";
 
 import { Link } from "next-view-transitions";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HERO_CARD_ATTR, useFolderGlow, useFolderHero } from "./FolderStack";
+
+type TransitionRole = "rising" | "settling" | null;
+// Outlives the longest reorder duration (backward = 1400ms) plus a safety
+// margin, so the rise/settle keyframe always finishes before we strip the
+// data attribute.
+const TRANSITION_ROLE_LINGER_MS = 1550;
 
 export type FolderTone = "evergreen" | "lavender" | "copper" | "lava";
 
 /** Shared layout constants so the parent can compute stack dimensions */
 export const FOLDER_LAYOUT = {
- /** Vertical gap between adjacent card tops in the peek-stack */
- peekGap: 64,
+ /** Vertical gap between adjacent card tops in the peek-stack. Bumped from 64
+  * so each peek gets a bit more breathing room above the next card's tab. */
+ peekGap: 80,
  /** Tab height. Tab is positioned ABOVE the wrapper (negative top) so it visually
   * sticks up out of the body, like a paper folder tab. */
  tabH: 24,
@@ -97,6 +104,30 @@ export default function FolderCard({
  const isHero = displayIndex === total - 1;
  const isMeHero = heroToggleId !== undefined && heroId === heroToggleId;
 
+ // Track displayIndex changes — but only the focal cards get a keyframe:
+ //   - rising  : any card becoming the hero (visible at the new front)
+ //   - settling: only TOGGLEABLE cards leaving the hero. The natural-hero
+ //               (projects) leaving in the forward direction is covered by
+ //               the rising contact card the whole way down, so its lift
+ //               adds nothing — gate by heroToggleId so it doesn't fire.
+ //   - other shifts: no keyframe, just the wrapper's `top` transition.
+ const previousDisplayIndexRef = useRef(displayIndex);
+ const [transitionRole, setTransitionRole] = useState<TransitionRole>(null);
+ useEffect(() => {
+  const prev = previousDisplayIndexRef.current;
+  if (prev === displayIndex) return;
+  const wasHero = prev === total - 1;
+  const isNowHero = displayIndex === total - 1;
+  let role: TransitionRole = null;
+  if (!wasHero && isNowHero) role = "rising";
+  else if (wasHero && !isNowHero && heroToggleId) role = "settling";
+  previousDisplayIndexRef.current = displayIndex;
+  if (role === null) return;
+  setTransitionRole(role);
+  const t = setTimeout(() => setTransitionRole(null), TRANSITION_ROLE_LINGER_MS);
+  return () => clearTimeout(t);
+ }, [displayIndex, total, heroToggleId]);
+
  const top = `${displayIndex * peekGap}px`;
  const height = bodyHeight;
  const zIndex = displayIndex + 1;
@@ -106,25 +137,28 @@ export default function FolderCard({
  // displayIndex so each tab moves with its card during the reorder.
  const tabRight = 4 + displayIndex * 2.5; // rem
 
- // Hover lift active when the user CAN turn this card into the hero (heroToggleId set)
- // and isn't already at hero. Other cards keep the lift on default home view via Link.
- const hoverClasses = "hover-lift hover-lift-xl hover-group";
+ // Hover-lift always on for non-toggleable cards (Link navigation cards) and for
+ // toggleable cards when they're NOT the current hero. When the user has activated
+ // this card as the hero, the lift would fight the surface they're trying to read
+ // (e.g. fill out the form), so disable it.
+ const hoverClasses = isMeHero ? "" : "hover-lift hover-lift-xl hover-group";
 
  const toggleHero = () => {
   if (!heroToggleId) return;
   setHeroId(isMeHero ? null : heroToggleId);
  };
 
- // Layer cross-fade (peek ↔ hero) — class lives in lib/animations.
- const layerBase = "folder-layer-fade absolute inset-0";
+ // Static peek ↔ hero swap. The wrapper's slide + the lift keyframe carry
+ // the motion; animating the text underneath produced a ghosted overlap.
+ const layerBase = "absolute inset-0";
  const visibleLayer = "opacity-100";
  const hiddenLayer = "pointer-events-none opacity-0";
 
  const defaultLeadInner = lead ?? (
   <>
    <h2 className="text-lg font-bold tracking-tight text-(--color-text) md:text-xl lg:text-2xl">{title}</h2>
-   <p className="mt-1 max-w-lg text-xs text-(--color-text-muted) md:text-sm">{description}</p>
-   {detail && <p className={`mt-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] ${s.accent}`}>{detail}</p>}
+   <p className="folder-peek-extra mt-1 max-w-lg text-xs text-(--color-text-muted) md:text-sm">{description}</p>
+   {detail && <p className={`folder-peek-extra mt-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] ${s.accent}`}>{detail}</p>}
   </>
  );
 
@@ -180,6 +214,7 @@ export default function FolderCard({
  // Mark the wrapper of the hero (when it's a heroToggleId card) so the
  // click-outside handler in FolderStack can identify it.
  const heroAttr = isMeHero ? { [HERO_CARD_ATTR]: heroToggleId } : {};
+ const transitionAttr = transitionRole ? { "data-transition-role": transitionRole } : {};
 
  return (
   <div
@@ -190,44 +225,51 @@ export default function FolderCard({
    onMouseEnter={() => notifyGlow(tone)}
    onMouseLeave={() => notifyGlow(null)}
    {...heroAttr}
+   {...transitionAttr}
   >
    {/* Inner shell carries the entry animation so it can't fight the wrapper's hover transform. */}
    <div className="folder-card-enter relative h-full" style={{ "--folder-stagger": index } as React.CSSProperties}>
-    {/* ── Card Body — fills the entire wrapper. ── */}
-    <div
-     className={`folder-card-body overflow-hidden border ${s.bg} ${s.border} rounded-[2.5rem]`}
-     style={{ position: "absolute", inset: 0 }}
-    >
-     {renderPeekLayer(!isHero || !heroContent)}
-     {renderHeroLayer(isHero && !!heroContent)}
+    {/* Shuffle layer — picks up the rise / settle keyframe when the wrapper has
+     * data-transition-role set. Lives on its own element so the transform
+     * doesn't fight the entry keyframe (.folder-card-enter) or the wrapper's
+     * hover-lift transform (.hover-lift). */}
+    <div className="folder-card-shuffle relative h-full">
+     {/* ── Card Body — fills the entire wrapper. ── */}
+     <div
+      className={`folder-card-body overflow-hidden border ${s.bg} ${s.border} rounded-[2.5rem]`}
+      style={{ position: "absolute", inset: 0 }}
+     >
+      {renderPeekLayer(!isHero || !heroContent)}
+      {renderHeroLayer(isHero && !!heroContent)}
 
-     {/* Children slot (peek-mode only): bottom-right corner */}
-     {children && !isHero && (
-      <div className="pointer-events-none absolute bottom-5 right-5 md:bottom-6 md:right-8 lg:right-10">
-       <div className="pointer-events-auto">{children}</div>
+      {/* Children slot (peek-mode only): bottom-right corner */}
+      {children && !isHero && (
+       <div className="pointer-events-none absolute bottom-5 right-5 md:bottom-6 md:right-8 lg:right-10">
+        <div className="pointer-events-auto">{children}</div>
+       </div>
+      )}
+     </div>
+
+     {/* ── Tab — sits above the body wrapper, like a folder tab. Click target for heroToggleId cards. ── */}
+     {heroToggleId ? (
+      <button
+       type="button"
+       onClick={toggleHero}
+       aria-label={`Bring ${title} to the front`}
+       className={`absolute z-10 flex h-6 w-fit cursor-pointer items-center rounded-t-xl px-4 text-[0.55rem] font-bold uppercase tracking-[0.25em] focus:outline-none ${s.tab}`}
+       style={{ top: `-${tabH}px`, right: `${tabRight}rem` }}
+      >
+       {label}
+      </button>
+     ) : (
+      <div
+       className={`pointer-events-none absolute z-10 flex h-6 w-fit items-center rounded-t-xl px-4 text-[0.55rem] font-bold uppercase tracking-[0.25em] ${s.tab}`}
+       style={{ top: `-${tabH}px`, right: `${tabRight}rem` }}
+      >
+       {label}
       </div>
      )}
     </div>
-
-    {/* ── Tab — sits above the body wrapper, like a folder tab. Click target for heroToggleId cards. ── */}
-    {heroToggleId ? (
-     <button
-      type="button"
-      onClick={toggleHero}
-      aria-label={`Bring ${title} to the front`}
-      className={`absolute z-10 flex h-6 w-fit cursor-pointer items-center rounded-t-xl px-4 text-[0.55rem] font-bold uppercase tracking-[0.25em] focus:outline-none ${s.tab}`}
-      style={{ top: `-${tabH}px`, right: `${tabRight}rem` }}
-     >
-      {label}
-     </button>
-    ) : (
-     <div
-      className={`pointer-events-none absolute z-10 flex h-6 w-fit items-center rounded-t-xl px-4 text-[0.55rem] font-bold uppercase tracking-[0.25em] ${s.tab}`}
-      style={{ top: `-${tabH}px`, right: `${tabRight}rem` }}
-     >
-      {label}
-     </div>
-    )}
    </div>
   </div>
  );

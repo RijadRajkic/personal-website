@@ -586,6 +586,23 @@
 }
 
 /*
+ * Peek-mode extras (description, detail line). Hidden at rest so only the
+ * title shows in the visible peek; cross-fade in when the wrapper's
+ * `.hover-group` is hovered (i.e. while the card is lifted by hover-lift).
+ * Lives here in the animation library — not on the component — so other
+ * folder-stack consumers can reach for the same hide/reveal pattern.
+ */
+.folder-peek-extra {
+ opacity: 0;
+ transition: opacity 280ms ease-out;
+}
+
+.hover-group:hover .folder-peek-extra,
+.hover-group:focus-within .folder-peek-extra {
+ opacity: 1;
+}
+
+/*
  * Direction-aware reorder timing. The wrapper carries `.folder-reorder-transition`
  * and (when closing) the modifier `.folder-reorder-backward`. The modifier
  * lifts the duration variables, which cascade down via CSS inheritance to the
@@ -593,26 +610,106 @@
  * every nested layer.
  */
 .folder-reorder-transition {
- --folder-reorder-duration: 850ms;
+ --folder-reorder-duration: 1300ms;
  --folder-reorder-easing: cubic-bezier(0.16, 1, 0.3, 1);
+ /* z-index swaps on the first frame in BOTH directions (step-start). The
+  * whole stack reorders to its final z relationships immediately, so there's
+  * no end-of-animation flash where multiple cards' z values race to swap. The
+  * visible motion comes from the slide and the lift keyframes. */
  transition:
   top var(--folder-reorder-duration) var(--folder-reorder-easing),
-  height var(--folder-reorder-duration) var(--folder-reorder-easing);
+  height var(--folder-reorder-duration) var(--folder-reorder-easing),
+  z-index var(--folder-reorder-duration) step-start;
 }
 
+/*
+ * Static peek↔hero swap. No opacity transition by design — animating the
+ * text content while the card itself is sliding produces a "ghost" feel
+ * where two stacked texts overlap mid-fade. The hard swap reads cleaner.
+ * The wrapper's slide + the card's lift keyframe carry the motion.
+ */
 .folder-layer-fade {
- /*
-  * Read from a parent-set custom prop (so .folder-reorder-backward higher up
-  * the tree can lift the duration via inheritance) with a 450ms fallback.
-  * Declaring the variable directly on this element would shadow the parent,
-  * so we use the var() default instead.
-  */
- transition: opacity var(--folder-fade-duration, 450ms) ease-out;
+ /* class kept as a layout marker; no transition. */
 }
 
 .folder-reorder-backward {
- --folder-reorder-duration: 1100ms;
- --folder-fade-duration: 650ms;
+ --folder-reorder-duration: 2200ms;
+ --folder-fade-duration: 800ms;
+}
+
+/*
+ * Card-stack motion — when a card transitions into or out of the hero slot,
+ * its inner `.folder-card-shuffle` element runs a rise / settle keyframe so
+ * the move reads as the card lifting OUT of the stack plane, gliding to its
+ * new spot, and being placed back. The keyframe is on a dedicated inner
+ * element so it doesn't fight the entry animation (`.folder-card-enter`) or
+ * the wrapper's hover-lift transform.
+ *
+ * The "rising" card is the new hero (large lift + stronger tilt); the
+ * "settling" card is the displaced default-hero (smaller lift + reverse tilt).
+ * Other cards just slide via the wrapper's `top` transition.
+ *
+ * Duration cascades from `--folder-reorder-duration` so backward closes get
+ * the same 1100ms slow-down as the wrapper transition.
+ */
+.folder-card-wrapper[data-transition-role="rising"] .folder-card-shuffle {
+ animation: folder-card-rise var(--folder-reorder-duration, 1100ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* During the close, the rising card is the natural hero (projects) — a subtler
+ * lift keeps the visual focus on contact tucking back rather than projects
+ * grandstanding into the hero slot. */
+.folder-card-wrapper.folder-reorder-backward[data-transition-role="rising"] .folder-card-shuffle {
+ animation: folder-card-rise-subtle var(--folder-reorder-duration, 1100ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.folder-card-wrapper[data-transition-role="settling"] .folder-card-shuffle {
+ animation: folder-card-settle var(--folder-reorder-duration, 1100ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes folder-card-rise {
+ 0% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+ 30% {
+  transform: translateY(-65px) scale(1.04) rotate(-1.6deg);
+ }
+ 55% {
+  transform: translateY(-65px) scale(1.04) rotate(-1.6deg);
+ }
+ 100% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+}
+
+@keyframes folder-card-rise-subtle {
+ 0% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+ 35% {
+  transform: translateY(-18px) scale(1.01) rotate(-0.4deg);
+ }
+ 60% {
+  transform: translateY(-18px) scale(1.01) rotate(-0.4deg);
+ }
+ 100% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+}
+
+@keyframes folder-card-settle {
+ 0% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+ 25% {
+  transform: translateY(-90px) scale(1.05) rotate(2deg);
+ }
+ 50% {
+  transform: translateY(-90px) scale(1.05) rotate(2deg);
+ }
+ 100% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
 }
 
 .folder-card-body::after {
@@ -644,11 +741,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
- .folder-card-enter {
+ .folder-card-enter,
+ .folder-card-wrapper[data-transition-role="rising"] .folder-card-shuffle,
+ .folder-card-wrapper[data-transition-role="settling"] .folder-card-shuffle {
   animation: none;
  }
  .folder-reorder-transition,
- .folder-layer-fade {
+ .folder-layer-fade,
+ .folder-peek-extra {
   transition: none;
  }
 }

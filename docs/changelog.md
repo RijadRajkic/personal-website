@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.2.2 — Reorder motion polish & tuck animation (2026-05-06)
+
+### What changed
+
+The deck-shuffle reorder got a real "tuck out / tuck back" feel. The hero-bound card and the settling card now each run their own keyframe on a dedicated inner element (`.folder-card-shuffle`) — a peak-and-hold lift with a slight rotation that sells the card being pulled out of the stack and placed back. The contact card is now uniquely the lowest z (1) the moment a close starts, which fixes a 1-frame z race at the end where multiple cards' z values were swapping simultaneously and producing a visible flash. The close is slower (2200ms vs 1700ms) and the rising-card lift during a close is much subtler (-18px vs -65px on open) so the focus stays on contact tucking back rather than projects grandstanding. Peek-state title rows now hide their description + accent line until hover — at rest the stack reads as just card titles, which made the over-stacked layout less noisy.
+
+### Why
+
+Across this session Rijad iterated on the closing animation several times because each version had a different problem: instant z-swap on close felt like a teleport; deferring z to end of the transition kept contact visually on top through the slide ("messed up the exit"); the keyframe-driven z-tuck (lifting contact above the stack with z=99 then snapping behind) drew too much attention away from the tuck and introduced an end-of-animation z-shift glitch from other cards racing to their final values. Settling on contact-permanently-lowest + everyone-snaps-z-on-frame-zero fixed the glitch and made the visible motion come from the lift keyframe + the contact tab traveling up through the stack — which is what a "tuck" actually looks like.
+
+### Key decisions
+
+- **Permanent z hierarchy during reorders, no z-index choreography.** Every wrapper snaps to its final z on frame zero (step-start in both directions). Contact's z=1 is uniquely lowest in the tucked state, so there's no DOM-order tiebreaker confusion when other cards are mid-transition.
+- **Direction-specific rising keyframe.** `folder-card-rise` (open: contact rises, big gesture) vs `folder-card-rise-subtle` (close: projects rises, near-imperceptible lift). The split is via `.folder-reorder-backward[data-transition-role="rising"]` selector specificity — no extra prop wiring.
+- **Peak-and-hold keyframes (0% → peak hold 25–55% → 100%) instead of single-peak triangles.** The lift visibly *lingers* at the top instead of bouncing through it, which was the difference between "card moves" and "card is being placed."
+- **Static peek↔hero text swap.** The earlier opacity cross-fade between the two layers produced a "ghost" where two stacked texts overlapped mid-fade. Hard swap reads cleaner; the wrapper's slide carries the motion.
+- **`folder-peek-extra` class hides description + accent at rest.** Reveals on `hover-group` hover. The peek-stack used to show every card's description simultaneously, which was visually loud at the wider gap.
+
+### Architecture notes
+
+- Lift gestures live on a dedicated `.folder-card-shuffle` inner element so they don't fight the entry animation (`.folder-card-enter` on the outer shell) or the wrapper's hover-lift transform.
+- `data-transition-role` on the wrapper is the cue: set by `FolderCard` via `useEffect` when `displayIndex` changes, lingered for `TRANSITION_ROLE_LINGER_MS` (1550ms) so the keyframe always finishes before the attribute is stripped. Settling is gated by `heroToggleId` so the natural-hero (projects) leaving forward doesn't fire a redundant lift.
+- All animations cascade off `--folder-reorder-duration` lifted by `.folder-reorder-backward`, so the slower close timing reaches the inner keyframes without threading variables through every selector.
+
+### What's next
+
+- Continue iterating on the rest of the home page UX.
+
 ## v0.2.1 — Direction-aware reorder timing (2026-05-05)
 
 ### What changed

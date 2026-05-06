@@ -105,8 +105,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   <>
    <JsonLd data={personJsonLd()} />
 
-   {/* Folder stack — positioned at ~20% from the top, responsive */}
-   <div className="bg-atmosphere flex h-screen w-screen justify-center overflow-hidden pt-[20vh]">
+   {/* Folder stack — positioned at ~15% from the top so the wider peekGap fits */}
+   <div className="bg-atmosphere flex h-screen w-screen justify-center overflow-hidden pt-[15vh]">
     <FolderStack initialHeroId={initialHeroId}>
      <div
       className="relative w-[85%] max-w-5xl"
