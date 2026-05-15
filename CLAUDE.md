@@ -6,6 +6,18 @@ This file is the project-scoped instructions for `personal-website`. Cross-proje
 
 ➡ **[rijadrajkic/rijadrajkic/CLAUDE.md](https://github.com/rijadrajkic/rijadrajkic/blob/main/CLAUDE.md)** — read it for everything not covered here.
 
+## Cross-cutting principles — Best Practices hub
+
+This repo also follows the **[📚 Best Practices](https://www.notion.so/358bf806d35d81e2bee1f2e432403148)** Notion hub. Most relevant pages for this repo:
+
+- [General Software](https://www.notion.so/358bf806d35d81cfbf23c82003411f56)
+- [TypeScript](https://www.notion.so/358bf806d35d81768b84dbf6b207fa28)
+- [React](https://www.notion.so/358bf806d35d81ce87b9d1533bcc426e)
+- [Next.js (App Router)](https://www.notion.so/358bf806d35d8196b2d6cd74d2f63a01)
+- [Tooling](https://www.notion.so/358bf806d35d81bf8fb6d7210293df74)
+
+The hub is auto-refreshed quarterly by BMO's scheduled task. **When this `CLAUDE.md` and the Best Practices disagree, the Best Practices pages win** — they're the rolling source of truth.
+
 ---
 
 ## This Project
