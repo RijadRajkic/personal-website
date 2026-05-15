@@ -1103,6 +1103,24 @@
  *
  * Reduced motion collapses every mode to a 150ms cross-fade.
  *
+ * Production fallback decision (chore/transition-fallback, 2026-05-15):
+ *   - On browsers WITHOUT View Transitions API support, none of the
+ *     ::view-transition-* rules below fire — next-view-transitions just
+ *     navigates without wrapping the swap.
+ *   - The visitor still sees motion: every new route mounts
+ *     `.folder-shell-body` which plays `folder-body-unfurl` +
+ *     `folder-stripe-sweep` on its `::before` (sections 10 + on this same
+ *     file). That's the no-VT fallback — a tasteful entry animation rather
+ *     than full route choreography.
+ *   - Of the two in-VT alternatives, `layered` (v1 slide) is preserved as a
+ *     dev-side comparison via `?tx=layered`; `subtle` is the no-theatre
+ *     option via `?tx=subtle`. The shipping default stays `morph` since both
+ *     alternatives require VT support anyway — there's no scenario where
+ *     swapping the default helps a no-VT visitor. If a real-device pass
+ *     surfaces a class of devices where `morph` stutters even with VT
+ *     support, prefer dropping `vt-morph-folder` duration (single number,
+ *     documented inline below) before swapping the whole default mode.
+ *
  * The matching `view-transition-name`s live on:
  *   - `components/navigation/FolderCard.tsx`   (homepage cards, one per tone)
  *   - `components/layout/FolderShell.tsx`      (inner-page <main>, active tone)
