@@ -1,77 +1,75 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import AnimatedSection from "@/components/ui/AnimatedSection";
-import AnimatedCard from "@/components/ui/AnimatedCard";
-import SectionHeading from "@/components/ui/SectionHeading";
-import Badge from "@/components/ui/Badge";
+import { Link } from "next-view-transitions";
 import { getPublishedBlogPosts } from "@/lib/data/blog-posts";
+import type { BlogPost } from "@/types/content";
 
 export const metadata: Metadata = {
  title: "Blog",
  description:
-  "Writing about frontend architecture, developer tooling, and the craft of building software.",
+  "Notes on frontend architecture, developer tooling, and the craft of building software.",
 };
+
+function formatDate(iso: string, short = false): string {
+ const d = new Date(iso);
+ return d.toLocaleDateString("en-US", {
+  month: "short",
+  day: "numeric",
+  ...(short ? {} : { year: "numeric" }),
+ });
+}
+
+function BlogRow({ post }: { post: BlogPost }) {
+ return (
+  <Link
+   href={`/blog/${post.slug}`}
+   className="group grid grid-cols-[auto_1fr] items-baseline gap-4 border-b border-(--color-border) py-6 transition-colors duration-300 hover:border-(--accent)/50 md:grid-cols-[110px_1fr_auto] md:gap-8 md:py-8"
+  >
+   <time
+    dateTime={post.publishedAt}
+    className="font-mono text-xs text-(--color-text-muted) md:text-sm"
+   >
+    <span className="md:hidden">{formatDate(post.publishedAt, true)}</span>
+    <span className="hidden md:inline">{formatDate(post.publishedAt)}</span>
+   </time>
+
+   <div className="min-w-0">
+    <h2 className="text-xl font-bold tracking-tight text-(--color-text) transition-colors duration-300 group-hover:text-(--accent) md:text-2xl">
+     {post.title}
+    </h2>
+    <p className="mt-2 text-sm leading-relaxed text-(--color-text-muted) md:text-base">
+     {post.excerpt}
+    </p>
+   </div>
+
+   <span className="col-span-2 hidden font-mono text-xs text-(--color-text-muted) md:col-span-1 md:inline">
+    {post.readTime}
+   </span>
+  </Link>
+ );
+}
 
 export default function BlogPage() {
  const posts = getPublishedBlogPosts();
-
  return (
-  <>
-   {/* ───── Header ───── */}
-   <AnimatedSection padded={false} className="pb-0 pt-24 md:pt-32">
-    <SectionHeading
-     eyebrow="Blog"
-     title="Writing"
-     description="Notes on frontend architecture, developer tooling, and the craft of building software."
-    />
-   </AnimatedSection>
+  <article className="mx-auto max-w-[900px] px-6 pt-14 pb-24 md:px-16 md:pt-20 md:pb-28">
+   <div className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--accent)">
+    <span className="h-1.5 w-1.5 rounded-full bg-(--accent)" aria-hidden />
+    Writing
+   </div>
 
-   {/* ───── Post grid ───── */}
-   <AnimatedSection amount={0.1}>
-    <div className="grid gap-6 md:grid-cols-2">
-     {posts.map((post, index) => (
-      <AnimatedCard key={post.slug} stagger={index}>
-       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <Badge>{post.category}</Badge>
-        <span className="text-xs uppercase tracking-[0.08em] text-(--color-text-muted)">
-         {post.readTime}
-        </span>
-       </div>
+   <h1 className="text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl lg:text-6xl">
+    Notes on frontend, tools, and craft.
+   </h1>
 
-       <h3 className="text-2xl font-bold tracking-tight text-(--color-text)">
-        <Link
-         href={`/blog/${post.slug}`}
-         className="transition hover:text-(--color-brand)"
-        >
-         {post.title}
-        </Link>
-       </h3>
+   <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-(--color-text-muted) md:text-xl">
+    Long-form thinking. Mostly things I had to learn the hard way.
+   </p>
 
-       <p className="mt-3 text-sm text-(--color-text-muted)">
-        {post.excerpt}
-       </p>
-
-       <div className="mt-4 flex flex-wrap gap-1.5">
-        {post.tags.map((tag) => (
-         <span
-          key={tag}
-          className="rounded-full bg-(--color-bg) px-2.5 py-0.5 text-xs font-medium text-(--color-text-muted)"
-         >
-          {tag}
-         </span>
-        ))}
-       </div>
-
-       <Link
-        href={`/blog/${post.slug}`}
-        className="mt-6 inline-flex text-sm font-semibold uppercase tracking-[0.08em] text-(--color-brand) transition hover:opacity-80"
-       >
-        Read article
-       </Link>
-      </AnimatedCard>
-     ))}
-    </div>
-   </AnimatedSection>
-  </>
+   <div className="mt-10 md:mt-14">
+    {posts.map((post) => (
+     <BlogRow key={post.slug} post={post} />
+    ))}
+   </div>
+  </article>
  );
 }
