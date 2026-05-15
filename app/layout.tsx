@@ -5,6 +5,7 @@ import "./globals.css";
 import { getBaseMetadata } from "@/lib/seo";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import TxStyleEffect from "@/components/layout/TxStyleEffect";
 
 const geistSans = localFont({
  src: "./fonts/GeistVF.woff",
@@ -23,9 +24,14 @@ export const metadata: Metadata = getBaseMetadata();
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
  return (
   <ViewTransitions>
-   <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+   <html
+    lang="en"
+    data-tx="morph"
+    className={`${geistSans.variable} ${geistMono.variable}`}
+   >
     <body>
      {children}
+     <TxStyleEffect />
      <SpeedInsights />
      <Analytics />
     </body>

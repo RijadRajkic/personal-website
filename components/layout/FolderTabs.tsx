@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import { folderNavItems, type FolderKey } from "@/lib/navigation";
 
 interface Props {

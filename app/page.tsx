@@ -136,6 +136,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
          lead={lead}
          heroToggleId={folder.heroToggleId}
          heroContent={heroContent}
+         viewTransitionName={`vt-folder-${folder.tone}`}
         />
        );
       })}

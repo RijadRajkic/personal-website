@@ -44,6 +44,13 @@ interface FolderCardProps {
  heroContent?: React.ReactNode;
  /** Render extra content at the bottom-right of the card body (peek mode only) */
  children?: React.ReactNode;
+ /**
+  * Shared `view-transition-name` for the home↔inner morph. When set, the
+  * card body advertises this name so the browser can pair it with the
+  * matching inner-page element during a View Transition. Pure DOM metadata
+  * — no effect on layout or rendering at rest.
+  */
+ viewTransitionName?: string;
 }
 
 const toneStyles: Record<FolderTone, { tab: string; bg: string; border: string; accent: string }> = {
@@ -86,6 +93,7 @@ export default function FolderCard({
  heroToggleId,
  heroContent,
  children,
+ viewTransitionName,
 }: FolderCardProps) {
  const s = toneStyles[tone];
  const notifyGlow = useFolderGlow();
@@ -237,7 +245,11 @@ export default function FolderCard({
      {/* ── Card Body — fills the entire wrapper. ── */}
      <div
       className={`folder-card-body overflow-hidden border ${s.bg} ${s.border} rounded-[2.5rem]`}
-      style={{ position: "absolute", inset: 0 }}
+      style={{
+       position: "absolute",
+       inset: 0,
+       viewTransitionName,
+      }}
      >
       {renderPeekLayer(!isHero || !heroContent)}
       {renderHeroLayer(isHero && !!heroContent)}

@@ -25,6 +25,21 @@ const TONE_ACCENT_VAR: Record<FolderTone, string> = {
  lava: "var(--color-molten-lava-300)",
 };
 
+/**
+ * Shared view-transition-name for the home↔inner morph. The matching name on
+ * the homepage lives on the FolderCard body that owns this tone. When set,
+ * the browser pairs the two and tweens their bounding boxes during VT
+ * navigation. Inner→inner navigation falls through to the root animation
+ * because each route advertises a different name (no pairing).
+ */
+const TONE_VT_NAME: Record<FolderTone, string> = {
+ evergreen: "vt-folder-evergreen",
+ copper: "vt-folder-copper",
+ lavender: "vt-folder-lavender",
+ cream: "vt-folder-cream",
+ lava: "vt-folder-lava",
+};
+
 export default function FolderShell({ children }: { children: ReactNode }) {
  const pathname = usePathname();
  const activeKey = getActiveFolder(pathname);
@@ -36,6 +51,10 @@ export default function FolderShell({ children }: { children: ReactNode }) {
   ["--accent" as string]: TONE_ACCENT_VAR[tone],
  };
 
+ const bodyStyle: CSSProperties | undefined = activeItem
+  ? { viewTransitionName: TONE_VT_NAME[tone] }
+  : undefined;
+
  return (
   <div
    className="folder-shell"
@@ -44,7 +63,9 @@ export default function FolderShell({ children }: { children: ReactNode }) {
    style={toneStyle}
   >
    <FolderTabs activeKey={activeKey} />
-   <main className="folder-shell-body">{children}</main>
+   <main className="folder-shell-body" style={bodyStyle}>
+    {children}
+   </main>
    <MobileDock activeKey={activeKey} />
   </div>
  );

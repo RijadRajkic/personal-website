@@ -1031,3 +1031,157 @@
   animation: none;
  }
 }
+
+/* ---------------------------------------------------------------------------
+ * 11. Page transitions (View Transitions API)
+ *
+ * Three modes, gated by `<html data-tx="...">`:
+ *   morph (default) — homepage folder cards share a `view-transition-name`
+ *                     with their inner-page <main> body, one per tone. The
+ *                     browser tweens the bounding box on each home↔inner
+ *                     navigation; everything else cross-fades as the root
+ *                     group. Inner→inner traffic advertises different names
+ *                     per route, so no pairing fires and both routes
+ *                     cross-fade.
+ *   layered          — the v1 root slide-in/out fallback. Available via
+ *                     `?tx=layered` for visual comparison.
+ *   subtle           — short cross-fade only, no morph. `?tx=subtle`.
+ *
+ * Reduced motion collapses every mode to a 150ms cross-fade.
+ *
+ * The matching `view-transition-name`s live on:
+ *   - `components/navigation/FolderCard.tsx`   (homepage cards, one per tone)
+ *   - `components/layout/FolderShell.tsx`      (inner-page <main>, active tone)
+ * ------------------------------------------------------------------------- */
+
+/* ---- Morph (default) ---- */
+
+html[data-tx="morph"] ::view-transition-old(root) {
+ animation: vt-fade-down 360ms var(--ease-out-expo) both;
+}
+html[data-tx="morph"] ::view-transition-new(root) {
+ animation: vt-fade-up 480ms var(--ease-spring) 220ms both;
+}
+
+html[data-tx="morph"] ::view-transition-group(vt-folder-evergreen),
+html[data-tx="morph"] ::view-transition-group(vt-folder-copper),
+html[data-tx="morph"] ::view-transition-group(vt-folder-lavender),
+html[data-tx="morph"] ::view-transition-group(vt-folder-cream),
+html[data-tx="morph"] ::view-transition-group(vt-folder-lava) {
+ animation-duration: 700ms;
+ animation-timing-function: var(--ease-spring);
+}
+
+html[data-tx="morph"] ::view-transition-old(vt-folder-evergreen),
+html[data-tx="morph"] ::view-transition-old(vt-folder-copper),
+html[data-tx="morph"] ::view-transition-old(vt-folder-lavender),
+html[data-tx="morph"] ::view-transition-old(vt-folder-cream),
+html[data-tx="morph"] ::view-transition-old(vt-folder-lava) {
+ animation: vt-fade-out 320ms var(--ease-out-expo) both;
+}
+html[data-tx="morph"] ::view-transition-new(vt-folder-evergreen),
+html[data-tx="morph"] ::view-transition-new(vt-folder-copper),
+html[data-tx="morph"] ::view-transition-new(vt-folder-lavender),
+html[data-tx="morph"] ::view-transition-new(vt-folder-cream),
+html[data-tx="morph"] ::view-transition-new(vt-folder-lava) {
+ animation: vt-fade-in 420ms var(--ease-spring) 280ms both;
+}
+
+/* ---- Layered (v1 fallback) ---- */
+
+html[data-tx="layered"] ::view-transition-old(root) {
+ animation: vt-slide-out-left 300ms var(--ease-spring) both;
+}
+html[data-tx="layered"] ::view-transition-new(root) {
+ animation: vt-slide-in-right 300ms var(--ease-spring) both;
+}
+/* Disable morph pairing under layered so the named groups fall back to the
+ * default cross-fade like everything else. */
+html[data-tx="layered"] ::view-transition-group(vt-folder-evergreen),
+html[data-tx="layered"] ::view-transition-group(vt-folder-copper),
+html[data-tx="layered"] ::view-transition-group(vt-folder-lavender),
+html[data-tx="layered"] ::view-transition-group(vt-folder-cream),
+html[data-tx="layered"] ::view-transition-group(vt-folder-lava) {
+ animation: none;
+}
+
+/* ---- Subtle ---- */
+
+html[data-tx="subtle"] ::view-transition-old(root),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-evergreen),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-copper),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-lavender),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-cream),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-lava) {
+ animation: vt-fade-out 200ms ease-in-out both;
+}
+html[data-tx="subtle"] ::view-transition-new(root),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-evergreen),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-copper),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-lavender),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-cream),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-lava) {
+ animation: vt-fade-in 200ms ease-in-out 130ms both;
+}
+html[data-tx="subtle"] ::view-transition-group(vt-folder-evergreen),
+html[data-tx="subtle"] ::view-transition-group(vt-folder-copper),
+html[data-tx="subtle"] ::view-transition-group(vt-folder-lavender),
+html[data-tx="subtle"] ::view-transition-group(vt-folder-cream),
+html[data-tx="subtle"] ::view-transition-group(vt-folder-lava) {
+ animation: none;
+}
+
+/* ---- Keyframes (shared by all three modes) ---- */
+
+@keyframes vt-fade-up {
+ from { opacity: 0; transform: translateY(20px); }
+ to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes vt-fade-down {
+ from { opacity: 1; transform: translateY(0); }
+ to   { opacity: 0; transform: translateY(20px); }
+}
+@keyframes vt-fade-in {
+ from { opacity: 0; }
+ to   { opacity: 1; }
+}
+@keyframes vt-fade-out {
+ from { opacity: 1; }
+ to   { opacity: 0; }
+}
+@keyframes vt-slide-out-left {
+ from { opacity: 1; transform: translateX(0); }
+ to   { opacity: 0; transform: translateX(-80px); }
+}
+@keyframes vt-slide-in-right {
+ from { opacity: 0; transform: translateX(80px); }
+ to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ---- Reduced motion — collapse every mode to a 150ms cross-fade ---- */
+
+@media (prefers-reduced-motion: reduce) {
+ ::view-transition-old(root),
+ ::view-transition-old(vt-folder-evergreen),
+ ::view-transition-old(vt-folder-copper),
+ ::view-transition-old(vt-folder-lavender),
+ ::view-transition-old(vt-folder-cream),
+ ::view-transition-old(vt-folder-lava) {
+  animation: vt-fade-out 150ms ease-in-out both;
+ }
+ ::view-transition-new(root),
+ ::view-transition-new(vt-folder-evergreen),
+ ::view-transition-new(vt-folder-copper),
+ ::view-transition-new(vt-folder-lavender),
+ ::view-transition-new(vt-folder-cream),
+ ::view-transition-new(vt-folder-lava) {
+  animation: vt-fade-in 150ms ease-in-out both;
+ }
+ ::view-transition-group(vt-folder-evergreen),
+ ::view-transition-group(vt-folder-copper),
+ ::view-transition-group(vt-folder-lavender),
+ ::view-transition-group(vt-folder-cream),
+ ::view-transition-group(vt-folder-lava) {
+  animation: none;
+ }
+}
