@@ -45,7 +45,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     <span aria-hidden>←</span> All projects
    </Link>
 
-   <h1 className="mt-6 text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl lg:text-6xl">
+   <h1 className="page-title mt-6 text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl lg:text-6xl">
     {project.title}
    </h1>
 

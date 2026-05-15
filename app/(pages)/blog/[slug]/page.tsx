@@ -57,7 +57,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     <span>{post.category}</span>
    </div>
 
-   <h1 className="mt-4 text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl">
+   <h1 className="page-title mt-4 text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl">
     {post.title}
    </h1>
 

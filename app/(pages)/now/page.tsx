@@ -21,7 +21,7 @@ export default function NowPage() {
      </div>
     </div>
 
-    <h1 className="mt-6 text-3xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-almond-cream-50) text-balance md:text-5xl">
+    <h1 className="page-title mt-6 text-3xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-almond-cream-50) text-balance md:text-5xl">
      What I&apos;m up to right now.
     </h1>
 

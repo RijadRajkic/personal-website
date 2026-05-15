@@ -52,12 +52,12 @@ export default async function BlogPage() {
  const posts = await getPublishedBlogPosts();
  return (
   <article className="mx-auto max-w-[900px] px-6 pt-14 pb-24 md:px-16 md:pt-20 md:pb-28">
-   <div className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--accent)">
+   <div className="page-eyebrow mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--accent)">
     <span className="h-1.5 w-1.5 rounded-full bg-(--accent)" aria-hidden />
     Writing
    </div>
 
-   <h1 className="text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl lg:text-6xl">
+   <h1 className="page-title text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl lg:text-6xl">
     Notes on frontend, tools, and craft.
    </h1>
 
