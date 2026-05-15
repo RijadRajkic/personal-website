@@ -753,4 +753,281 @@
  }
 }
 
+/* ---------------------------------------------------------------------------
+ * 10. Inner-page folder-nav chrome
+ *
+ * Persistent navigation wrapping every inner page. Built by
+ * `components/layout/FolderShell.tsx` from three primitives:
+ *
+ *   - `.folder-shell`        : the root, declares `--accent` + `--tone-body`
+ *                              CSS vars per route (set inline by FolderShell)
+ *                              and exposes `data-tone` + `data-active-folder`.
+ *   - `.folder-tabs`         : desktop tab strip — sticky at the top edge,
+ *                              wordmark left, five tab pills right. The active
+ *                              tab is lifted out of plane in its tone color
+ *                              with a soft accent pulse; siblings sit folded
+ *                              and peek upward on hover.
+ *   - `.mobile-dock`         : the same five destinations as mini-folder cards
+ *                              fixed to the bottom edge on mobile; iOS
+ *                              safe-area-inset respected.
+ *
+ * Tone wash + accent stripe sweep live on `.folder-shell-body`. Reduced motion
+ * kills the entry sweep and the active pulse; tone colors persist for clarity.
+ * ------------------------------------------------------------------------- */
 
+.folder-shell {
+ min-height: 100vh;
+ background: var(--color-bg);
+ isolation: isolate;
+}
+
+.folder-shell-body {
+ position: relative;
+ min-height: 100vh;
+ padding-bottom: 96px; /* room for the fixed mobile dock */
+ background:
+  linear-gradient(
+   180deg,
+   color-mix(in srgb, var(--tone-body, var(--color-surface)) 22%, transparent) 0%,
+   transparent 420px
+  ),
+  var(--color-bg);
+}
+
+@media (min-width: 768px) {
+ .folder-shell-body {
+  padding-bottom: 0;
+ }
+}
+
+/* Drop the wash when no folder is active (route not under any inner page). */
+.folder-shell[data-active-folder="none"] .folder-shell-body {
+ background: var(--color-bg);
+}
+
+/* Accent stripe sweep — fires once on mount across the top edge of the body. */
+.folder-shell-body::before {
+ content: "";
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ height: 2px;
+ background: linear-gradient(
+  90deg,
+  transparent,
+  var(--accent, transparent),
+  transparent
+ );
+ transform: translateX(-100%);
+ animation: folder-stripe-sweep 1.2s var(--ease-out-expo) 0.1s both;
+ pointer-events: none;
+ z-index: 1;
+}
+
+@keyframes folder-stripe-sweep {
+ from { transform: translateX(-100%); opacity: 0; }
+ 30%  { opacity: 1; }
+ to   { transform: translateX(100%); opacity: 0; }
+}
+
+/* ----- Desktop tab strip ----- */
+
+.folder-tabs {
+ position: sticky;
+ top: 0;
+ z-index: 40;
+ align-items: flex-end;
+ gap: 8px;
+ padding: 16px 32px 0;
+ background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+ backdrop-filter: blur(12px);
+ -webkit-backdrop-filter: blur(12px);
+ border-bottom: 1px solid var(--color-border);
+}
+
+.folder-wordmark {
+ display: inline-flex;
+ align-items: center;
+ gap: 10px;
+ margin-right: auto;
+ padding-bottom: 12px;
+ font-size: 14px;
+ font-weight: 700;
+ letter-spacing: -0.005em;
+ color: var(--color-text);
+ white-space: nowrap;
+ text-decoration: none;
+}
+
+.folder-wordmark .stack-glyph {
+ display: inline-flex;
+ flex-direction: column;
+ gap: 2px;
+}
+.folder-wordmark .stack-glyph span {
+ display: block;
+ height: 3px;
+ border-radius: 1px;
+ background: currentColor;
+}
+.folder-wordmark .stack-glyph span:nth-child(1) { width: 8px;  margin-left: 6px; opacity: 0.5; }
+.folder-wordmark .stack-glyph span:nth-child(2) { width: 14px;                   opacity: 0.75; }
+.folder-wordmark .stack-glyph span:nth-child(3) { width: 18px; }
+
+.folder-tab-row {
+ display: inline-flex;
+ align-items: flex-end;
+ gap: 6px;
+}
+
+.folder-tab {
+ position: relative;
+ display: inline-flex;
+ align-items: center;
+ padding: 8px 18px;
+ border-radius: 10px 10px 0 0;
+ font-size: 11px;
+ font-weight: 700;
+ letter-spacing: 0.18em;
+ text-transform: uppercase;
+ color: var(--color-text-muted);
+ background: var(--color-surface);
+ border: 1px solid var(--color-border);
+ border-bottom: none;
+ transform: translateY(2px);
+ text-decoration: none;
+ transition:
+  transform 0.35s var(--ease-spring),
+  background 0.3s ease,
+  color 0.3s ease,
+  border-color 0.3s ease,
+  box-shadow 0.3s ease;
+ white-space: nowrap;
+}
+
+/* Per-tab tone tint — drives both inactive peek hover and active fill. */
+.folder-tab[data-tone="evergreen"] { --tab-tone: var(--color-evergreen-700); }
+.folder-tab[data-tone="copper"]    { --tab-tone: var(--color-copper-700); }
+.folder-tab[data-tone="lavender"]  { --tab-tone: var(--color-dusty-lavender-700); }
+.folder-tab[data-tone="cream"]     { --tab-tone: var(--color-almond-cream-700); }
+.folder-tab[data-tone="lava"]      { --tab-tone: var(--color-molten-lava-700); }
+
+.folder-tab[data-active="false"]:hover,
+.folder-tab[data-active="false"]:focus-visible {
+ transform: translateY(-3px);
+ color: var(--color-text);
+ background: color-mix(in srgb, var(--color-surface) 60%, var(--tab-tone));
+ border-color: color-mix(in srgb, var(--color-border) 50%, var(--tab-tone));
+}
+
+.folder-tab[data-active="true"] {
+ transform: translateY(-8px);
+ color: var(--color-text);
+ background: var(--tab-tone);
+ border-color: transparent;
+ padding-top: 12px;
+ padding-bottom: 12px;
+ z-index: 1;
+ box-shadow: 0 -2px 24px color-mix(in srgb, var(--tab-tone) 45%, transparent);
+ animation: folder-tab-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes folder-tab-pulse {
+ 0%, 100% { box-shadow: 0 -2px 24px color-mix(in srgb, var(--tab-tone) 45%, transparent); }
+ 50%      { box-shadow: 0 -2px 36px color-mix(in srgb, var(--tab-tone) 75%, transparent); }
+}
+
+/* ----- Mobile bottom dock ----- */
+
+.mobile-dock {
+ position: fixed;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ z-index: 40;
+ display: flex;
+ align-items: flex-end;
+ justify-content: space-between;
+ gap: 4px;
+ padding: 10px 12px;
+ padding-bottom: max(10px, env(safe-area-inset-bottom));
+ background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+ backdrop-filter: blur(14px);
+ -webkit-backdrop-filter: blur(14px);
+ border-top: 1px solid var(--color-border);
+}
+
+.mobile-folder {
+ display: flex;
+ flex: 1 1 0;
+ flex-direction: column;
+ align-items: stretch;
+ min-width: 0;
+ text-decoration: none;
+ transform: translateY(0);
+ transition:
+  transform 0.35s var(--ease-spring),
+  filter 0.3s ease;
+}
+
+.mobile-folder .mini-tab {
+ height: 6px;
+ width: 28px;
+ align-self: center;
+ border-radius: 4px 4px 0 0;
+ background: var(--color-border);
+ transition: background 0.3s ease;
+}
+
+.mobile-folder .mini-body {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ min-height: 38px;
+ padding: 0 4px;
+ border-radius: 8px;
+ background: var(--color-surface);
+ border: 1px solid var(--color-border);
+ color: var(--color-text-muted);
+ font-size: 9.5px;
+ font-weight: 700;
+ letter-spacing: 0.14em;
+ text-transform: uppercase;
+ white-space: nowrap;
+ transition:
+  background 0.3s ease,
+  color 0.3s ease,
+  border-color 0.3s ease;
+}
+
+.mobile-folder[data-tone="evergreen"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="evergreen"][data-active="true"] .mini-tab { background: var(--color-evergreen-700); }
+.mobile-folder[data-tone="copper"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="copper"][data-active="true"] .mini-tab { background: var(--color-copper-700); }
+.mobile-folder[data-tone="lavender"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="lavender"][data-active="true"] .mini-tab { background: var(--color-dusty-lavender-700); }
+.mobile-folder[data-tone="cream"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="cream"][data-active="true"] .mini-tab { background: var(--color-almond-cream-700); }
+.mobile-folder[data-tone="lava"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="lava"][data-active="true"] .mini-tab { background: var(--color-molten-lava-700); }
+
+.mobile-folder[data-active="true"] {
+ transform: translateY(-4px);
+}
+.mobile-folder[data-active="true"] .mini-body {
+ color: var(--color-text);
+ border-color: transparent;
+}
+
+/* Reduced motion — kill the entry stripe sweep and the active-tab pulse.
+ * Tone colors persist so visitors still see which folder is open. */
+@media (prefers-reduced-motion: reduce) {
+ .folder-shell-body::before {
+  animation: none;
+  display: none;
+ }
+ .folder-tab[data-active="true"] {
+  animation: none;
+ }
+}
