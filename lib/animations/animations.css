@@ -1044,6 +1044,17 @@
   border-color 0.3s ease;
 }
 
+/* Sub-360px (iPhone SE 1st gen, older Android): "PROJECTS" is the limiting
+ * label — at default font-size + tracking it overflows the 56px cell. Step
+ * down both size and tracking so all five labels fit cleanly. Verified by
+ * measurement at 320px via chore/device-validation. */
+@media (max-width: 359px) {
+ .mobile-folder .mini-body {
+  font-size: 8.5px;
+  letter-spacing: 0.10em;
+ }
+}
+
 .mobile-folder[data-tone="evergreen"][data-active="true"] .mini-body,
 .mobile-folder[data-tone="evergreen"][data-active="true"] .mini-tab { background: var(--color-evergreen-700); }
 .mobile-folder[data-tone="copper"][data-active="true"] .mini-body,
@@ -1106,6 +1117,10 @@ html[data-tx="morph"] ::view-transition-new(root) {
  animation: vt-fade-up 480ms var(--ease-spring) 220ms both;
 }
 
+/* 700ms is the spring-tuned bounding-box morph duration. Verified at 60fps
+ * on desktop Chrome via chore/device-validation; if mid-range Android shows
+ * stutter, drop this to 550–600ms — that's the only number that matters
+ * here, the cross-fades below ride on top. */
 html[data-tx="morph"] ::view-transition-group(vt-folder-evergreen),
 html[data-tx="morph"] ::view-transition-group(vt-folder-copper),
 html[data-tx="morph"] ::view-transition-group(vt-folder-lavender),
