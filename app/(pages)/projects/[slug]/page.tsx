@@ -9,12 +9,13 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
- return getPublishedProjects().map((p) => ({ slug: p.slug }));
+ const all = await getPublishedProjects();
+ return all.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
  const { slug } = await params;
- const project = getProjectBySlug(slug);
+ const project = await getProjectBySlug(slug);
  if (!project) return {};
  return { title: project.title, description: project.description };
 }
@@ -23,17 +24,17 @@ function getInitials(title: string): string {
  return title.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }
 
-function getNextProject(current: Project): Project {
- const all = getPublishedProjects();
+async function getNextProject(current: Project): Promise<Project> {
+ const all = await getPublishedProjects();
  const idx = all.findIndex((p) => p.slug === current.slug);
  return all[(idx + 1) % all.length];
 }
 
 export default async function ProjectDetailPage({ params }: PageProps) {
  const { slug } = await params;
- const project = getProjectBySlug(slug);
+ const project = await getProjectBySlug(slug);
  if (!project) notFound();
- const next = getNextProject(project);
+ const next = await getNextProject(project);
 
  return (
   <article className="mx-auto max-w-[880px] px-6 pt-14 pb-24 md:px-16 md:pt-16 md:pb-28">

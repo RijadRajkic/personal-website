@@ -89,8 +89,10 @@ function ContactHero() {
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
- const projects = getFeaturedProjects(3);
- const posts = getFeaturedBlogPosts(3);
+ const [projects, posts] = await Promise.all([
+  getFeaturedProjects(3),
+  getFeaturedBlogPosts(3),
+ ]);
 
  const detailMap: Record<string, string> = {
   projects: `${projects.length} featured projects`,

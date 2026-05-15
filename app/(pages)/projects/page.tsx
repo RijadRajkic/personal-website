@@ -62,8 +62,8 @@ function ProjectCard({ project }: { project: Project }) {
  );
 }
 
-export default function ProjectsPage() {
- const projects = getPublishedProjects();
+export default async function ProjectsPage() {
+ const projects = await getPublishedProjects();
  return (
   <article className="mx-auto max-w-[1100px] px-6 pt-14 pb-24 md:px-16 md:pt-20 md:pb-28">
    <div className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--accent)">

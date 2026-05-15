@@ -1,6 +1,17 @@
+import "server-only";
+import { unstable_cache } from "next/cache";
 import type { Project } from "@/types/content";
+import {
+ fetchProjectBySlugFromNotion,
+ fetchProjectsFromNotion,
+} from "@/lib/notion/projects";
 
-export const projects: Project[] = [
+/**
+ * Hardcoded fallback used whenever NOTION_TOKEN / NOTION_DB_PROJECTS aren't
+ * configured or the Notion fetch fails. Notion-backed data and this list share
+ * the exact same `Project` shape, per the design hub.
+ */
+const projects: Project[] = [
  {
   id: "1",
   slug: "shelfsync",
@@ -101,16 +112,46 @@ export const projects: Project[] = [
  },
 ];
 
-export function getPublishedProjects(): Project[] {
- return projects.filter((p) => p.status === "Published").sort((a, b) => a.sortOrder - b.sortOrder);
+function fallbackPublishedProjects(): Project[] {
+ return projects
+  .filter((p) => p.status === "Published")
+  .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-export function getFeaturedProjects(limit = 3): Project[] {
- return getPublishedProjects()
-  .filter((p) => p.featured)
-  .slice(0, limit);
+/**
+ * Try Notion first; fall back to the hardcoded list. Wrapped in
+ * `unstable_cache` with a 10-minute revalidate so Notion edits show up
+ * without redeploying but we don't hammer the API on every request.
+ */
+const loadAllProjects = unstable_cache(
+ async (): Promise<Project[]> => {
+  const fromNotion = await fetchProjectsFromNotion();
+  if (fromNotion && fromNotion.length > 0) return fromNotion;
+  return fallbackPublishedProjects();
+ },
+ ["projects-published"],
+ { revalidate: 600, tags: ["projects"] },
+);
+
+export async function getPublishedProjects(): Promise<Project[]> {
+ return loadAllProjects();
 }
 
-export function getProjectBySlug(slug: string): Project | undefined {
- return projects.find((p) => p.slug === slug && p.status === "Published");
+export async function getFeaturedProjects(limit = 3): Promise<Project[]> {
+ const all = await loadAllProjects();
+ return all.filter((p) => p.featured).slice(0, limit);
+}
+
+const loadProjectBySlug = unstable_cache(
+ async (slug: string): Promise<Project | undefined> => {
+  const fromNotion = await fetchProjectBySlugFromNotion(slug);
+  if (fromNotion) return fromNotion;
+  return projects.find((p) => p.slug === slug && p.status === "Published");
+ },
+ ["project-by-slug"],
+ { revalidate: 600, tags: ["projects"] },
+);
+
+export async function getProjectBySlug(slug: string): Promise<Project | undefined> {
+ return loadProjectBySlug(slug);
 }
