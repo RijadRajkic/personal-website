@@ -5,7 +5,10 @@ export const metadata: Metadata = {
  description: "What Rijad is up to right now — current work, reading, listening, thinking.",
 };
 
-const UPDATED = "4 May 2026";
+// Hand-edit this when starting a new month, alongside the four paragraphs
+// below. The page deliberately has no CMS — /now is a single-screen snapshot
+// of right-now and is meant to be light to refresh in code.
+const UPDATED = "May 2026";
 
 export default function NowPage() {
  return (
@@ -27,23 +30,12 @@ export default function NowPage() {
 
     <div className="mt-7 max-w-[42ch] space-y-5 text-base leading-relaxed text-(--color-almond-cream-100)/90 md:text-lg">
      <p>
-      Most of my hours this month go into{" "}
-      <strong className="text-(--color-almond-cream-50)">ShelfSync</strong>. The mobile app is in soft launch — fifty
-      readers, two crash reports, one feature request I actually want to build. I&apos;m keeping the surface small.
-     </p>
-     <p>
       On the side: I rebuilt this site. Notion as the CMS, Next.js App Router, and a small custom animation library so I
       could stop shipping Framer Motion. Writing about it as I go.
      </p>
-     <p>
-      Reading{" "}
-      <em className="text-(--color-almond-cream-100)">A Pattern Language</em>{" "}
-      for the second time. It maps almost too neatly onto software architecture, which is either very flattering or a
-      warning.
-     </p>
-     <p>
-      Outside the screen: long walks in the morning, sourdough on Sundays, and the slow project of roasting my own
-      coffee. Currently bad at it. Improving.
+     <p className="text-(--color-almond-cream-200)/70">
+      [Hand-edit this section each month — what Rijad is currently working on, reading, listening to, thinking about.
+      Keep it short, four paragraphs max. Voice should match the rest of the site.]
      </p>
     </div>
 

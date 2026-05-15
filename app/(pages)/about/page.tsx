@@ -27,11 +27,14 @@ function QuickFact({ label, lines }: QuickFactProps) {
  );
 }
 
+// Quick facts are intentionally short and fill-in-the-blank — edit these in
+// place when starting a new month / project / book / playlist. The shape stays
+// fixed; the contents change.
 const QUICK_FACTS: QuickFactProps[] = [
- { label: "Currently", lines: ["Sarajevo, Bosnia", "Building ShelfSync"] },
+ { label: "Currently", lines: ["Sarajevo, Bosnia"] },
  { label: "Stack", lines: ["TypeScript · React · Next.js", "Node.js · Postgres · Notion API"] },
- { label: "Reading", lines: ["A Pattern Language,", "Christopher Alexander"] },
- { label: "Listening", lines: ["Khruangbin, Bonobo,", "lots of Brian Eno"] },
+ { label: "Reading", lines: ["—"] },
+ { label: "Listening", lines: ["—"] },
 ];
 
 const linkInline =
@@ -83,7 +86,7 @@ export default function AboutPage() {
      </h2>
      <p>
       React Server Components — the mental shift, not the syntax. CSS that does the work animation libraries used to.
-      Long-form writing as a way to figure out what I actually think. Bread, but only the kind that takes 24 hours.
+      Long-form writing as a way to figure out what I actually think.
      </p>
 
      <h2 className="!mt-12 !mb-3 text-2xl font-bold tracking-[-0.01em] text-(--color-text)">How to find me</h2>
