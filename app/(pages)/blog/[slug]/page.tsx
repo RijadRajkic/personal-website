@@ -9,12 +9,13 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
- return getPublishedBlogPosts().map((p) => ({ slug: p.slug }));
+ const all = await getPublishedBlogPosts();
+ return all.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
  const { slug } = await params;
- const post = getBlogPostBySlug(slug);
+ const post = await getBlogPostBySlug(slug);
  if (!post) return {};
  return { title: post.title, description: post.excerpt };
 }
@@ -27,17 +28,17 @@ function formatDate(iso: string): string {
  });
 }
 
-function getNextPost(current: BlogPost): BlogPost {
- const all = getPublishedBlogPosts();
+async function getNextPost(current: BlogPost): Promise<BlogPost> {
+ const all = await getPublishedBlogPosts();
  const idx = all.findIndex((p) => p.slug === current.slug);
  return all[(idx + 1) % all.length];
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
  const { slug } = await params;
- const post = getBlogPostBySlug(slug);
+ const post = await getBlogPostBySlug(slug);
  if (!post) notFound();
- const next = getNextPost(post);
+ const next = await getNextPost(post);
 
  return (
   <article className="mx-auto max-w-[720px] px-6 pt-14 pb-24 md:px-8 md:pt-16 md:pb-28">
