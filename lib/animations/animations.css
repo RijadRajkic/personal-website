@@ -1165,6 +1165,106 @@ html[data-tx="subtle"] ::view-transition-group(vt-folder-lava) {
  to   { opacity: 1; transform: translateX(0); }
 }
 
+/* ---------------------------------------------------------------------------
+ * 12. /now postcard
+ *
+ * Single-screen postcard look on the /now route. Almond-cream tone, subtle
+ * grain dots, ~1° tilt at rest, molten-lava thumbtack pin. Hover straightens
+ * the card slightly. The grain comes from two layered radial-gradient noise
+ * fields + a 45°/-45° cross-hatch overlay rendered via the ::before pseudo.
+ * ------------------------------------------------------------------------- */
+
+.now-sheet {
+ position: relative;
+ padding: 26px 24px 30px;
+ background:
+  linear-gradient(180deg, rgba(235, 227, 217, 0.04) 0%, rgba(235, 227, 217, 0.02) 100%),
+  radial-gradient(circle at 30% 10%, rgba(235, 227, 217, 0.06), transparent 50%),
+  color-mix(in srgb, var(--color-almond-cream-900) 80%, #000);
+ border: 1px solid rgba(216, 201, 182, 0.18);
+ border-radius: 6px;
+ box-shadow:
+  0 1px 0 rgba(235, 227, 217, 0.04) inset,
+  0 30px 60px rgba(0, 0, 0, 0.4),
+  0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+@media (min-width: 768px) {
+ .now-sheet {
+  padding: 44px 48px 48px;
+ }
+}
+
+.now-sheet-postcard {
+ background:
+  radial-gradient(circle at 20% 10%, rgba(235, 227, 217, 0.05) 0.5px, transparent 1.2px),
+  radial-gradient(circle at 75% 70%, rgba(235, 227, 217, 0.04) 0.5px, transparent 1.2px),
+  linear-gradient(180deg, rgba(235, 227, 217, 0.04) 0%, rgba(235, 227, 217, 0.02) 100%),
+  color-mix(in srgb, var(--color-almond-cream-900) 80%, #000);
+ background-size: 7px 7px, 11px 11px, auto, auto;
+ transform: rotate(-0.8deg);
+ transition: transform 0.6s var(--ease-spring);
+}
+
+.now-sheet-postcard:hover {
+ transform: rotate(0deg);
+}
+
+.now-sheet-postcard::before {
+ content: "";
+ position: absolute;
+ inset: 0;
+ pointer-events: none;
+ border-radius: inherit;
+ background-image:
+  repeating-linear-gradient(45deg, rgba(235, 227, 217, 0.015) 0, rgba(235, 227, 217, 0.015) 1px, transparent 1px, transparent 4px),
+  repeating-linear-gradient(-45deg, rgba(235, 227, 217, 0.015) 0, rgba(235, 227, 217, 0.015) 1px, transparent 1px, transparent 4px);
+ mix-blend-mode: overlay;
+}
+
+.now-pulse-dot {
+ display: inline-block;
+ width: 6px;
+ height: 6px;
+ border-radius: 50%;
+ background: var(--color-almond-cream-200);
+ box-shadow: 0 0 10px var(--color-almond-cream-200);
+ animation: now-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes now-pulse {
+ 0%, 100% { opacity: 1; transform: scale(1); }
+ 50%      { opacity: 0.5; transform: scale(0.85); }
+}
+
+.now-pin {
+ position: absolute;
+ top: -10px;
+ left: 50%;
+ width: 22px;
+ height: 22px;
+ transform: translateX(-50%);
+ border-radius: 50%;
+ background: radial-gradient(circle at 35% 35%, var(--color-molten-lava-300), var(--color-molten-lava-600) 60%, var(--color-molten-lava-800));
+ box-shadow:
+  0 3px 8px rgba(0, 0, 0, 0.5),
+  0 0 0 1px rgba(0, 0, 0, 0.3),
+  inset -2px -2px 4px rgba(0, 0, 0, 0.4),
+  inset 2px 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+.now-pin span {
+ position: absolute;
+ inset: 6px;
+ border-radius: 50%;
+ background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), transparent 50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+ .now-sheet-postcard { transform: rotate(0deg); transition: none; }
+ .now-pulse-dot      { animation: none; }
+}
+
 /* ---- Reduced motion — collapse every mode to a 150ms cross-fade ---- */
 
 @media (prefers-reduced-motion: reduce) {
