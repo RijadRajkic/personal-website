@@ -102,6 +102,121 @@
  --color-accent-foreground: #f5eff2;
  --color-destructive: #e8715b;
  --color-border: rgba(240, 236, 230, 0.12);
+ --color-border-strong: rgba(240, 236, 230, 0.22);
+
+ /* Folder tones — palette steps bound to the five named tones,
+  * consumed by the inner-page chrome and the home↔inner morph transition. */
+ --tone-evergreen-tab: var(--color-evergreen-700);
+ --tone-evergreen-body: var(--color-evergreen-900);
+ --tone-copper-tab: var(--color-copper-700);
+ --tone-copper-body: var(--color-copper-900);
+ --tone-lavender-tab: var(--color-dusty-lavender-700);
+ --tone-lavender-body: var(--color-dusty-lavender-900);
+ --tone-lava-tab: var(--color-molten-lava-700);
+ --tone-lava-body: var(--color-molten-lava-900);
+ --tone-cream-tab: var(--color-almond-cream-700);
+ --tone-cream-body: var(--color-almond-cream-900);
+
+ /* Atmosphere — exposed as vars for downstream consumers; the existing
+  * .bg-atmosphere rule below keeps its inline values for homepage stability. */
+ --atmosphere-grid-line: rgba(240, 236, 230, 0.2);
+ --atmosphere-grid-size: 32px;
+ --atmosphere-mask: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 90%);
+
+ /* Display alias on the sans family (kept separate so display can diverge later). */
+ --font-display: var(--font-sans);
+
+ /* Type scale — inner-page heading scale. The homepage uses its own
+  * inline sizing and is untouched by these tokens. */
+ --text-display-size: 3.75rem;
+ --text-display-weight: 700;
+ --text-display-leading: 1.05;
+ --text-display-tracking: -0.02em;
+
+ --text-h1-size: 3rem;
+ --text-h1-weight: 700;
+ --text-h1-leading: 1.1;
+ --text-h1-tracking: -0.02em;
+
+ --text-h2-size: 1.875rem;
+ --text-h2-weight: 700;
+ --text-h2-leading: 1.2;
+ --text-h2-tracking: -0.01em;
+
+ --text-h3-size: 1.5rem;
+ --text-h3-weight: 700;
+ --text-h3-leading: 1.25;
+ --text-h3-tracking: -0.005em;
+
+ --text-body-size: 1rem;
+ --text-body-weight: 400;
+ --text-body-leading: 1.6;
+ --text-body-tracking: 0;
+
+ --text-body-lg-size: 1.125rem;
+ --text-body-lg-weight: 400;
+ --text-body-lg-leading: 1.7;
+
+ --text-small-size: 0.875rem;
+ --text-small-weight: 400;
+ --text-small-leading: 1.5;
+
+ --text-eyebrow-size: 0.75rem;
+ --text-eyebrow-weight: 600;
+ --text-eyebrow-tracking: 0.12em;
+ --text-eyebrow-case: uppercase;
+
+ --text-tab-size: 0.55rem;
+ --text-tab-weight: 700;
+ --text-tab-tracking: 0.25em;
+ --text-tab-case: uppercase;
+
+ --text-detail-size: 0.6rem;
+ --text-detail-weight: 700;
+ --text-detail-tracking: 0.2em;
+ --text-detail-case: uppercase;
+
+ /* Spacing scale */
+ --space-1: 4px;
+ --space-2: 8px;
+ --space-3: 12px;
+ --space-4: 16px;
+ --space-5: 20px;
+ --space-6: 24px;
+ --space-8: 32px;
+ --space-10: 40px;
+ --space-12: 48px;
+ --space-16: 64px;
+ --space-20: 80px;
+
+ /* Radii */
+ --radius-sm: 8px;
+ --radius-md: 12px;
+ --radius-lg: 16px;
+ --radius-xl: 24px;
+ --radius-pill: 9999px;
+
+ /* Shadows */
+ --shadow-folder-rest: 0 -2px 20px rgba(0, 0, 0, 0.25);
+ --shadow-folder-lift:
+  0 -8px 48px rgba(0, 0, 0, 0.55),
+  0 0 80px rgba(0, 0, 0, 0.2);
+ --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
+ --shadow-card-hover: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+ /* Motion — two easings ship site-wide. */
+ --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+ --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+ --duration-fast: 0.4s;
+ --duration-base: 0.45s;
+ --duration-slow: 0.7s;
+ --duration-slower: 1s;
+
+ /* Folder-specific motion */
+ --folder-peek-gap: 64px;
+ --folder-tab-height: 24px;
+ --folder-lift-y: -48px;
+ --folder-stagger-step: 0.1s;
 }
 
 /* ============================================================================
