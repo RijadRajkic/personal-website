@@ -946,9 +946,6 @@
  right: 0;
  bottom: 0;
  z-index: 40;
- display: flex;
- align-items: flex-end;
- justify-content: space-between;
  gap: 4px;
  padding: 10px 12px;
  padding-bottom: max(10px, env(safe-area-inset-bottom));
@@ -956,6 +953,16 @@
  backdrop-filter: blur(14px);
  -webkit-backdrop-filter: blur(14px);
  border-top: 1px solid var(--color-border);
+}
+
+/* display:flex only at narrow widths so Tailwind's `md:hidden` (which loads
+ * before custom CSS in v4's layer order) can still hide the dock at md+. */
+@media (max-width: 767px) {
+ .mobile-dock {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+ }
 }
 
 .mobile-folder {
