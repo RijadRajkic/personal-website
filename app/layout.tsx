@@ -28,6 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     lang="en"
     data-tx="morph"
     className={`${geistSans.variable} ${geistMono.variable}`}
+    suppressHydrationWarning
    >
     <body>
      {children}
