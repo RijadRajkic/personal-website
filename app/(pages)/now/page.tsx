@@ -33,9 +33,15 @@ export default function NowPage() {
       On the side: I rebuilt this site. Notion as the CMS, Next.js App Router, and a small custom animation library so I
       could stop shipping Framer Motion. Writing about it as I go.
      </p>
-     <p className="text-(--color-almond-cream-200)/70">
-      [Hand-edit this section each month — what Rijad is currently working on, reading, listening to, thinking about.
-      Keep it short, four paragraphs max. Voice should match the rest of the site.]
+     <p>
+      Most of my hours go into{" "}
+      <strong className="text-(--color-almond-cream-50)">ShelfSync</strong> — a book-tracking platform that started as
+      my own frustration with three half-broken setups for the same problem. The mobile app is in soft launch. The
+      surface stays small on purpose.
+     </p>
+     <p>
+      Thinking a lot about how much software work is just choosing what to leave out. The pages, the features, the
+      libraries that almost made it in but didn&apos;t. The hardest part is admitting you don&apos;t need them.
      </p>
     </div>
 
