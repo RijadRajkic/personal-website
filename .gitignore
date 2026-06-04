@@ -34,3 +34,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code session config
+.claude/
+
+# local-only handoff notes (BMO scratch, never pushed)
+docs/code-bmo-*.md
+
+# local-only design bundle reference imports (Claude Design v1+v2 prototypes & chats)
+docs/design-bundles/
+
+# local-only operational scripts (one-off git/repo ops, not tracked)
+scripts/
