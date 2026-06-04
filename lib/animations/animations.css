@@ -562,3 +562,802 @@
  --parallax-depth: 32px;
 }
 
+/* ---------------------------------------------------------------------------
+ * 8. Folder-card stack motion
+ *
+ * Animations specific to the home page's folder-card stack. Kept here (not in
+ * globals.css) so all motion lives in one library. These pair with the
+ * components in `components/navigation/`:
+ *
+ *   - `.folder-card-enter`        : one-shot mount keyframe (slides up + fades
+ *                                   in), staggered via the `--folder-stagger`
+ *                                   CSS var the parent sets.
+ *   - `.folder-reorder-transition`: top + height transition applied to each
+ *                                   wrapper so the deck-shuffle reorder reads
+ *                                   as a smooth slide rather than a snap.
+ *   - `.folder-layer-fade`        : opacity transition for the peek/hero
+ *                                   content cross-fade inside each card body.
+ *   - `.folder-card-body::after`  : cross-fades a deeper drop shadow on hover,
+ *                                   driven by the wrapper's `.hover-group`.
+ * ------------------------------------------------------------------------- */
+
+.folder-card-enter {
+ animation: folder-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--folder-stagger, 0) * 0.12s) both;
+}
+
+/*
+ * Peek-mode extras (description, detail line). Hidden at rest so only the
+ * title shows in the visible peek; cross-fade in when the wrapper's
+ * `.hover-group` is hovered (i.e. while the card is lifted by hover-lift).
+ * Lives here in the animation library — not on the component — so other
+ * folder-stack consumers can reach for the same hide/reveal pattern.
+ */
+.folder-peek-extra {
+ opacity: 0;
+ transition: opacity 280ms ease-out;
+}
+
+.hover-group:hover .folder-peek-extra,
+.hover-group:focus-within .folder-peek-extra {
+ opacity: 1;
+}
+
+/*
+ * Direction-aware reorder timing. The wrapper carries `.folder-reorder-transition`
+ * and (when closing) the modifier `.folder-reorder-backward`. The modifier
+ * lifts the duration variables, which cascade down via CSS inheritance to the
+ * inner `.folder-layer-fade` elements without needing to thread a class through
+ * every nested layer.
+ */
+.folder-reorder-transition {
+ --folder-reorder-duration: 1300ms;
+ --folder-reorder-easing: cubic-bezier(0.16, 1, 0.3, 1);
+ /* z-index swaps on the first frame in BOTH directions (step-start). The
+  * whole stack reorders to its final z relationships immediately, so there's
+  * no end-of-animation flash where multiple cards' z values race to swap. The
+  * visible motion comes from the slide and the lift keyframes. */
+ transition:
+  top var(--folder-reorder-duration) var(--folder-reorder-easing),
+  height var(--folder-reorder-duration) var(--folder-reorder-easing),
+  z-index var(--folder-reorder-duration) step-start;
+}
+
+/*
+ * Static peek↔hero swap. No opacity transition by design — animating the
+ * text content while the card itself is sliding produces a "ghost" feel
+ * where two stacked texts overlap mid-fade. The hard swap reads cleaner.
+ * The wrapper's slide + the card's lift keyframe carry the motion.
+ */
+.folder-layer-fade {
+ /* class kept as a layout marker; no transition. */
+}
+
+.folder-reorder-backward {
+ --folder-reorder-duration: 2200ms;
+ --folder-fade-duration: 800ms;
+}
+
+/*
+ * Card-stack motion — when a card transitions into or out of the hero slot,
+ * its inner `.folder-card-shuffle` element runs a rise / settle keyframe so
+ * the move reads as the card lifting OUT of the stack plane, gliding to its
+ * new spot, and being placed back. The keyframe is on a dedicated inner
+ * element so it doesn't fight the entry animation (`.folder-card-enter`) or
+ * the wrapper's hover-lift transform.
+ *
+ * The "rising" card is the new hero (large lift + stronger tilt); the
+ * "settling" card is the displaced default-hero (smaller lift + reverse tilt).
+ * Other cards just slide via the wrapper's `top` transition.
+ *
+ * Duration cascades from `--folder-reorder-duration` so backward closes get
+ * the same 1100ms slow-down as the wrapper transition.
+ */
+.folder-card-wrapper[data-transition-role="rising"] .folder-card-shuffle {
+ animation: folder-card-rise var(--folder-reorder-duration, 1100ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* During the close, the rising card is the natural hero (projects) — a subtler
+ * lift keeps the visual focus on contact tucking back rather than projects
+ * grandstanding into the hero slot. */
+.folder-card-wrapper.folder-reorder-backward[data-transition-role="rising"] .folder-card-shuffle {
+ animation: folder-card-rise-subtle var(--folder-reorder-duration, 1100ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.folder-card-wrapper[data-transition-role="settling"] .folder-card-shuffle {
+ animation: folder-card-settle var(--folder-reorder-duration, 1100ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes folder-card-rise {
+ 0% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+ 30% {
+  transform: translateY(-65px) scale(1.04) rotate(-1.6deg);
+ }
+ 55% {
+  transform: translateY(-65px) scale(1.04) rotate(-1.6deg);
+ }
+ 100% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+}
+
+@keyframes folder-card-rise-subtle {
+ 0% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+ 35% {
+  transform: translateY(-18px) scale(1.01) rotate(-0.4deg);
+ }
+ 60% {
+  transform: translateY(-18px) scale(1.01) rotate(-0.4deg);
+ }
+ 100% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+}
+
+@keyframes folder-card-settle {
+ 0% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+ 25% {
+  transform: translateY(-90px) scale(1.05) rotate(2deg);
+ }
+ 50% {
+  transform: translateY(-90px) scale(1.05) rotate(2deg);
+ }
+ 100% {
+  transform: translateY(0) scale(1) rotate(0);
+ }
+}
+
+.folder-card-body::after {
+ content: "";
+ position: absolute;
+ inset: 0;
+ pointer-events: none;
+ border-radius: inherit;
+ box-shadow:
+  0 -8px 48px rgba(0, 0, 0, 0.55),
+  0 0 80px rgba(0, 0, 0, 0.2);
+ opacity: 0;
+ transition: opacity var(--hover-duration, 0.45s) var(--hover-easing, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.hover-group:hover .folder-card-body::after {
+ opacity: 1;
+}
+
+@keyframes folder-enter {
+ from {
+  opacity: 0;
+  transform: translateY(24px);
+ }
+ to {
+  opacity: 1;
+  transform: translateY(0);
+ }
+}
+
+@media (prefers-reduced-motion: reduce) {
+ .folder-card-enter,
+ .folder-card-wrapper[data-transition-role="rising"] .folder-card-shuffle,
+ .folder-card-wrapper[data-transition-role="settling"] .folder-card-shuffle {
+  animation: none;
+ }
+ .folder-reorder-transition,
+ .folder-layer-fade,
+ .folder-peek-extra {
+  transition: none;
+ }
+}
+
+/* ---------------------------------------------------------------------------
+ * 10. Inner-page folder-nav chrome
+ *
+ * Persistent navigation wrapping every inner page. Built by
+ * `components/layout/FolderShell.tsx` from three primitives:
+ *
+ *   - `.folder-shell`        : the root, declares `--accent` + `--tone-body`
+ *                              CSS vars per route (set inline by FolderShell)
+ *                              and exposes `data-tone` + `data-active-folder`.
+ *   - `.folder-tabs`         : desktop tab strip — sticky at the top edge,
+ *                              wordmark left, five tab pills right. The active
+ *                              tab is lifted out of plane in its tone color
+ *                              with a soft accent pulse; siblings sit folded
+ *                              and peek upward on hover.
+ *   - `.mobile-dock`         : the same five destinations as mini-folder cards
+ *                              fixed to the bottom edge on mobile; iOS
+ *                              safe-area-inset respected.
+ *
+ * Tone wash + accent stripe sweep live on `.folder-shell-body`. Reduced motion
+ * kills the entry sweep and the active pulse; tone colors persist for clarity.
+ * ------------------------------------------------------------------------- */
+
+.folder-shell {
+ min-height: 100vh;
+ background: var(--color-bg);
+ isolation: isolate;
+}
+
+.folder-shell-body {
+ position: relative;
+ min-height: 100vh;
+ padding-bottom: 96px; /* room for the fixed mobile dock */
+ background:
+  linear-gradient(
+   180deg,
+   color-mix(in srgb, var(--tone-body, var(--color-surface)) 22%, transparent) 0%,
+   transparent 420px
+  ),
+  var(--color-bg);
+}
+
+@media (min-width: 768px) {
+ .folder-shell-body {
+  padding-bottom: 0;
+ }
+}
+
+/* Drop the wash when no folder is active (route not under any inner page). */
+.folder-shell[data-active-folder="none"] .folder-shell-body {
+ background: var(--color-bg);
+}
+
+/* Body unfurl — settle phase after a morph completes. Pairs with the
+ * stripe sweep on `::before` and the staggered `.page-eyebrow` /
+ * `.page-title` fade-up below. Browsers without View Transitions still see
+ * this on every mount — it doubles as a light entry animation. */
+.folder-shell-body {
+ animation: folder-body-unfurl 720ms var(--ease-spring) 0.05s both;
+}
+
+@keyframes folder-body-unfurl {
+ from { opacity: 0.85; transform: translateY(10px) scale(0.995); }
+ to   { opacity: 1;     transform: translateY(0)    scale(1); }
+}
+
+/* Sequenced eyebrow + h1 entry — anchored visual lineage from the morphed
+ * tab to the page heading. Stagger is timed so the eye reads it as
+ * continuous with the morph rather than a delayed extra animation. */
+.folder-shell-body .page-eyebrow {
+ animation: folder-content-rise 600ms var(--ease-spring) 0.32s both;
+}
+.folder-shell-body .page-title {
+ animation: folder-content-rise 640ms var(--ease-spring) 0.42s both;
+}
+
+@keyframes folder-content-rise {
+ from { opacity: 0; transform: translateY(14px); }
+ to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+ .folder-shell-body,
+ .folder-shell-body .page-eyebrow,
+ .folder-shell-body .page-title {
+  animation: none;
+ }
+}
+
+/* Accent stripe sweep — fires once on mount across the top edge of the body. */
+.folder-shell-body::before {
+ content: "";
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ height: 2px;
+ background: linear-gradient(
+  90deg,
+  transparent,
+  var(--accent, transparent),
+  transparent
+ );
+ transform: translateX(-100%);
+ animation: folder-stripe-sweep 1.2s var(--ease-out-expo) 0.1s both;
+ pointer-events: none;
+ z-index: 1;
+}
+
+@keyframes folder-stripe-sweep {
+ from { transform: translateX(-100%); opacity: 0; }
+ 30%  { opacity: 1; }
+ to   { transform: translateX(100%); opacity: 0; }
+}
+
+/* ----- Desktop tab strip ----- */
+
+.folder-tabs {
+ position: sticky;
+ top: 0;
+ z-index: 40;
+ align-items: flex-end;
+ gap: 8px;
+ padding: 16px 32px 0;
+ background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+ backdrop-filter: blur(12px);
+ -webkit-backdrop-filter: blur(12px);
+ border-bottom: 1px solid var(--color-border);
+}
+
+.folder-wordmark {
+ display: inline-flex;
+ align-items: center;
+ gap: 10px;
+ margin-right: auto;
+ padding-bottom: 12px;
+ font-size: 14px;
+ font-weight: 700;
+ letter-spacing: -0.005em;
+ color: var(--color-text);
+ white-space: nowrap;
+ text-decoration: none;
+}
+
+.folder-wordmark .stack-glyph {
+ display: inline-flex;
+ flex-direction: column;
+ gap: 2px;
+}
+.folder-wordmark .stack-glyph span {
+ display: block;
+ height: 3px;
+ border-radius: 1px;
+ background: currentColor;
+}
+.folder-wordmark .stack-glyph span:nth-child(1) { width: 8px;  margin-left: 6px; opacity: 0.5; }
+.folder-wordmark .stack-glyph span:nth-child(2) { width: 14px;                   opacity: 0.75; }
+.folder-wordmark .stack-glyph span:nth-child(3) { width: 18px; }
+
+.folder-tab-row {
+ display: inline-flex;
+ align-items: flex-end;
+ gap: 6px;
+}
+
+.folder-tab {
+ position: relative;
+ display: inline-flex;
+ align-items: center;
+ padding: 8px 18px;
+ border-radius: 10px 10px 0 0;
+ font-size: 11px;
+ font-weight: 700;
+ letter-spacing: 0.18em;
+ text-transform: uppercase;
+ color: var(--color-text-muted);
+ background: var(--color-surface);
+ border: 1px solid var(--color-border);
+ border-bottom: none;
+ transform: translateY(2px);
+ text-decoration: none;
+ transition:
+  transform 0.35s var(--ease-spring),
+  background 0.3s ease,
+  color 0.3s ease,
+  border-color 0.3s ease,
+  box-shadow 0.3s ease;
+ white-space: nowrap;
+}
+
+/* Per-tab tone tint — drives both inactive peek hover and active fill. */
+.folder-tab[data-tone="evergreen"] { --tab-tone: var(--color-evergreen-700); }
+.folder-tab[data-tone="copper"]    { --tab-tone: var(--color-copper-700); }
+.folder-tab[data-tone="lavender"]  { --tab-tone: var(--color-dusty-lavender-700); }
+.folder-tab[data-tone="cream"]     { --tab-tone: var(--color-almond-cream-700); }
+.folder-tab[data-tone="lava"]      { --tab-tone: var(--color-molten-lava-700); }
+
+.folder-tab[data-active="false"]:hover,
+.folder-tab[data-active="false"]:focus-visible {
+ transform: translateY(-3px);
+ color: var(--color-text);
+ background: color-mix(in srgb, var(--color-surface) 60%, var(--tab-tone));
+ border-color: color-mix(in srgb, var(--color-border) 50%, var(--tab-tone));
+}
+
+.folder-tab[data-active="true"] {
+ transform: translateY(-8px);
+ color: var(--color-text);
+ background: var(--tab-tone);
+ border-color: transparent;
+ padding-top: 12px;
+ padding-bottom: 12px;
+ z-index: 1;
+ box-shadow: 0 -2px 24px color-mix(in srgb, var(--tab-tone) 45%, transparent);
+ animation: folder-tab-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes folder-tab-pulse {
+ 0%, 100% { box-shadow: 0 -2px 24px color-mix(in srgb, var(--tab-tone) 45%, transparent); }
+ 50%      { box-shadow: 0 -2px 36px color-mix(in srgb, var(--tab-tone) 75%, transparent); }
+}
+
+/* ----- Mobile bottom dock ----- */
+
+.mobile-dock {
+ position: fixed;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ z-index: 40;
+ gap: 4px;
+ padding: 10px 12px;
+ padding-bottom: max(10px, env(safe-area-inset-bottom));
+ background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+ backdrop-filter: blur(14px);
+ -webkit-backdrop-filter: blur(14px);
+ border-top: 1px solid var(--color-border);
+}
+
+/* display:flex only at narrow widths so Tailwind's `md:hidden` (which loads
+ * before custom CSS in v4's layer order) can still hide the dock at md+. */
+@media (max-width: 767px) {
+ .mobile-dock {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+ }
+}
+
+.mobile-folder {
+ display: flex;
+ flex: 1 1 0;
+ flex-direction: column;
+ align-items: stretch;
+ min-width: 0;
+ text-decoration: none;
+ transform: translateY(0);
+ transition:
+  transform 0.35s var(--ease-spring),
+  filter 0.3s ease;
+}
+
+.mobile-folder .mini-tab {
+ height: 6px;
+ width: 28px;
+ align-self: center;
+ border-radius: 4px 4px 0 0;
+ background: var(--color-border);
+ transition: background 0.3s ease;
+}
+
+.mobile-folder .mini-body {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ min-height: 38px;
+ padding: 0 4px;
+ border-radius: 8px;
+ background: var(--color-surface);
+ border: 1px solid var(--color-border);
+ color: var(--color-text-muted);
+ font-size: 9.5px;
+ font-weight: 700;
+ letter-spacing: 0.14em;
+ text-transform: uppercase;
+ white-space: nowrap;
+ transition:
+  background 0.3s ease,
+  color 0.3s ease,
+  border-color 0.3s ease;
+}
+
+/* Sub-360px (iPhone SE 1st gen, older Android): "PROJECTS" is the limiting
+ * label — at default font-size + tracking it overflows the 56px cell. Step
+ * down both size and tracking so all five labels fit cleanly. Verified by
+ * measurement at 320px via chore/device-validation. */
+@media (max-width: 359px) {
+ .mobile-folder .mini-body {
+  font-size: 8.5px;
+  letter-spacing: 0.10em;
+ }
+}
+
+.mobile-folder[data-tone="evergreen"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="evergreen"][data-active="true"] .mini-tab { background: var(--color-evergreen-700); }
+.mobile-folder[data-tone="copper"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="copper"][data-active="true"] .mini-tab { background: var(--color-copper-700); }
+.mobile-folder[data-tone="lavender"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="lavender"][data-active="true"] .mini-tab { background: var(--color-dusty-lavender-700); }
+.mobile-folder[data-tone="cream"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="cream"][data-active="true"] .mini-tab { background: var(--color-almond-cream-700); }
+.mobile-folder[data-tone="lava"][data-active="true"] .mini-body,
+.mobile-folder[data-tone="lava"][data-active="true"] .mini-tab { background: var(--color-molten-lava-700); }
+
+.mobile-folder[data-active="true"] {
+ transform: translateY(-4px);
+}
+.mobile-folder[data-active="true"] .mini-body {
+ color: var(--color-text);
+ border-color: transparent;
+}
+
+/* Reduced motion — kill the entry stripe sweep and the active-tab pulse.
+ * Tone colors persist so visitors still see which folder is open. */
+@media (prefers-reduced-motion: reduce) {
+ .folder-shell-body::before {
+  animation: none;
+  display: none;
+ }
+ .folder-tab[data-active="true"] {
+  animation: none;
+ }
+}
+
+/* ---------------------------------------------------------------------------
+ * 11. Page transitions (View Transitions API)
+ *
+ * Three modes, gated by `<html data-tx="...">`:
+ *   morph (default) — homepage folder cards share a `view-transition-name`
+ *                     with their inner-page <main> body, one per tone. The
+ *                     browser tweens the bounding box on each home↔inner
+ *                     navigation; everything else cross-fades as the root
+ *                     group. Inner→inner traffic advertises different names
+ *                     per route, so no pairing fires and both routes
+ *                     cross-fade.
+ *   layered          — the v1 root slide-in/out fallback. Available via
+ *                     `?tx=layered` for visual comparison.
+ *   subtle           — short cross-fade only, no morph. `?tx=subtle`.
+ *
+ * Reduced motion collapses every mode to a 150ms cross-fade.
+ *
+ * Production fallback decision (chore/transition-fallback, 2026-05-15):
+ *   - On browsers WITHOUT View Transitions API support, none of the
+ *     ::view-transition-* rules below fire — next-view-transitions just
+ *     navigates without wrapping the swap.
+ *   - The visitor still sees motion: every new route mounts
+ *     `.folder-shell-body` which plays `folder-body-unfurl` +
+ *     `folder-stripe-sweep` on its `::before` (sections 10 + on this same
+ *     file). That's the no-VT fallback — a tasteful entry animation rather
+ *     than full route choreography.
+ *   - Of the two in-VT alternatives, `layered` (v1 slide) is preserved as a
+ *     dev-side comparison via `?tx=layered`; `subtle` is the no-theatre
+ *     option via `?tx=subtle`. The shipping default stays `morph` since both
+ *     alternatives require VT support anyway — there's no scenario where
+ *     swapping the default helps a no-VT visitor. If a real-device pass
+ *     surfaces a class of devices where `morph` stutters even with VT
+ *     support, prefer dropping `vt-morph-folder` duration (single number,
+ *     documented inline below) before swapping the whole default mode.
+ *
+ * The matching `view-transition-name`s live on:
+ *   - `components/navigation/FolderCard.tsx`   (homepage cards, one per tone)
+ *   - `components/layout/FolderShell.tsx`      (inner-page <main>, active tone)
+ * ------------------------------------------------------------------------- */
+
+/* ---- Morph (default) ---- */
+
+html[data-tx="morph"] ::view-transition-old(root) {
+ animation: vt-fade-down 360ms var(--ease-out-expo) both;
+}
+html[data-tx="morph"] ::view-transition-new(root) {
+ animation: vt-fade-up 480ms var(--ease-spring) 220ms both;
+}
+
+/* 700ms is the spring-tuned bounding-box morph duration. Verified at 60fps
+ * on desktop Chrome via chore/device-validation; if mid-range Android shows
+ * stutter, drop this to 550–600ms — that's the only number that matters
+ * here, the cross-fades below ride on top. */
+html[data-tx="morph"] ::view-transition-group(vt-folder-evergreen),
+html[data-tx="morph"] ::view-transition-group(vt-folder-copper),
+html[data-tx="morph"] ::view-transition-group(vt-folder-lavender),
+html[data-tx="morph"] ::view-transition-group(vt-folder-cream),
+html[data-tx="morph"] ::view-transition-group(vt-folder-lava) {
+ animation-duration: 700ms;
+ animation-timing-function: var(--ease-spring);
+}
+
+html[data-tx="morph"] ::view-transition-old(vt-folder-evergreen),
+html[data-tx="morph"] ::view-transition-old(vt-folder-copper),
+html[data-tx="morph"] ::view-transition-old(vt-folder-lavender),
+html[data-tx="morph"] ::view-transition-old(vt-folder-cream),
+html[data-tx="morph"] ::view-transition-old(vt-folder-lava) {
+ animation: vt-fade-out 320ms var(--ease-out-expo) both;
+}
+html[data-tx="morph"] ::view-transition-new(vt-folder-evergreen),
+html[data-tx="morph"] ::view-transition-new(vt-folder-copper),
+html[data-tx="morph"] ::view-transition-new(vt-folder-lavender),
+html[data-tx="morph"] ::view-transition-new(vt-folder-cream),
+html[data-tx="morph"] ::view-transition-new(vt-folder-lava) {
+ animation: vt-fade-in 420ms var(--ease-spring) 280ms both;
+}
+
+/* ---- Layered (v1 fallback) ---- */
+
+html[data-tx="layered"] ::view-transition-old(root) {
+ animation: vt-slide-out-left 300ms var(--ease-spring) both;
+}
+html[data-tx="layered"] ::view-transition-new(root) {
+ animation: vt-slide-in-right 300ms var(--ease-spring) both;
+}
+/* Disable morph pairing under layered so the named groups fall back to the
+ * default cross-fade like everything else. */
+html[data-tx="layered"] ::view-transition-group(vt-folder-evergreen),
+html[data-tx="layered"] ::view-transition-group(vt-folder-copper),
+html[data-tx="layered"] ::view-transition-group(vt-folder-lavender),
+html[data-tx="layered"] ::view-transition-group(vt-folder-cream),
+html[data-tx="layered"] ::view-transition-group(vt-folder-lava) {
+ animation: none;
+}
+
+/* ---- Subtle ---- */
+
+html[data-tx="subtle"] ::view-transition-old(root),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-evergreen),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-copper),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-lavender),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-cream),
+html[data-tx="subtle"] ::view-transition-old(vt-folder-lava) {
+ animation: vt-fade-out 200ms ease-in-out both;
+}
+html[data-tx="subtle"] ::view-transition-new(root),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-evergreen),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-copper),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-lavender),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-cream),
+html[data-tx="subtle"] ::view-transition-new(vt-folder-lava) {
+ animation: vt-fade-in 200ms ease-in-out 130ms both;
+}
+html[data-tx="subtle"] ::view-transition-group(vt-folder-evergreen),
+html[data-tx="subtle"] ::view-transition-group(vt-folder-copper),
+html[data-tx="subtle"] ::view-transition-group(vt-folder-lavender),
+html[data-tx="subtle"] ::view-transition-group(vt-folder-cream),
+html[data-tx="subtle"] ::view-transition-group(vt-folder-lava) {
+ animation: none;
+}
+
+/* ---- Keyframes (shared by all three modes) ---- */
+
+@keyframes vt-fade-up {
+ from { opacity: 0; transform: translateY(20px); }
+ to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes vt-fade-down {
+ from { opacity: 1; transform: translateY(0); }
+ to   { opacity: 0; transform: translateY(20px); }
+}
+@keyframes vt-fade-in {
+ from { opacity: 0; }
+ to   { opacity: 1; }
+}
+@keyframes vt-fade-out {
+ from { opacity: 1; }
+ to   { opacity: 0; }
+}
+@keyframes vt-slide-out-left {
+ from { opacity: 1; transform: translateX(0); }
+ to   { opacity: 0; transform: translateX(-80px); }
+}
+@keyframes vt-slide-in-right {
+ from { opacity: 0; transform: translateX(80px); }
+ to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ---------------------------------------------------------------------------
+ * 12. /now postcard
+ *
+ * Single-screen postcard look on the /now route. Almond-cream tone, subtle
+ * grain dots, ~1° tilt at rest, molten-lava thumbtack pin. Hover straightens
+ * the card slightly. The grain comes from two layered radial-gradient noise
+ * fields + a 45°/-45° cross-hatch overlay rendered via the ::before pseudo.
+ * ------------------------------------------------------------------------- */
+
+.now-sheet {
+ position: relative;
+ padding: 26px 24px 30px;
+ background:
+  linear-gradient(180deg, rgba(235, 227, 217, 0.04) 0%, rgba(235, 227, 217, 0.02) 100%),
+  radial-gradient(circle at 30% 10%, rgba(235, 227, 217, 0.06), transparent 50%),
+  color-mix(in srgb, var(--color-almond-cream-900) 80%, #000);
+ border: 1px solid rgba(216, 201, 182, 0.18);
+ border-radius: 6px;
+ box-shadow:
+  0 1px 0 rgba(235, 227, 217, 0.04) inset,
+  0 30px 60px rgba(0, 0, 0, 0.4),
+  0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+@media (min-width: 768px) {
+ .now-sheet {
+  padding: 44px 48px 48px;
+ }
+}
+
+.now-sheet-postcard {
+ background:
+  radial-gradient(circle at 20% 10%, rgba(235, 227, 217, 0.05) 0.5px, transparent 1.2px),
+  radial-gradient(circle at 75% 70%, rgba(235, 227, 217, 0.04) 0.5px, transparent 1.2px),
+  linear-gradient(180deg, rgba(235, 227, 217, 0.04) 0%, rgba(235, 227, 217, 0.02) 100%),
+  color-mix(in srgb, var(--color-almond-cream-900) 80%, #000);
+ background-size: 7px 7px, 11px 11px, auto, auto;
+ transform: rotate(-0.8deg);
+ transition: transform 0.6s var(--ease-spring);
+}
+
+.now-sheet-postcard:hover {
+ transform: rotate(0deg);
+}
+
+.now-sheet-postcard::before {
+ content: "";
+ position: absolute;
+ inset: 0;
+ pointer-events: none;
+ border-radius: inherit;
+ background-image:
+  repeating-linear-gradient(45deg, rgba(235, 227, 217, 0.015) 0, rgba(235, 227, 217, 0.015) 1px, transparent 1px, transparent 4px),
+  repeating-linear-gradient(-45deg, rgba(235, 227, 217, 0.015) 0, rgba(235, 227, 217, 0.015) 1px, transparent 1px, transparent 4px);
+ mix-blend-mode: overlay;
+}
+
+.now-pulse-dot {
+ display: inline-block;
+ width: 6px;
+ height: 6px;
+ border-radius: 50%;
+ background: var(--color-almond-cream-200);
+ box-shadow: 0 0 10px var(--color-almond-cream-200);
+ animation: now-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes now-pulse {
+ 0%, 100% { opacity: 1; transform: scale(1); }
+ 50%      { opacity: 0.5; transform: scale(0.85); }
+}
+
+.now-pin {
+ position: absolute;
+ top: -10px;
+ left: 50%;
+ width: 22px;
+ height: 22px;
+ transform: translateX(-50%);
+ border-radius: 50%;
+ background: radial-gradient(circle at 35% 35%, var(--color-molten-lava-300), var(--color-molten-lava-600) 60%, var(--color-molten-lava-800));
+ box-shadow:
+  0 3px 8px rgba(0, 0, 0, 0.5),
+  0 0 0 1px rgba(0, 0, 0, 0.3),
+  inset -2px -2px 4px rgba(0, 0, 0, 0.4),
+  inset 2px 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+.now-pin span {
+ position: absolute;
+ inset: 6px;
+ border-radius: 50%;
+ background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), transparent 50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+ .now-sheet-postcard { transform: rotate(0deg); transition: none; }
+ .now-pulse-dot      { animation: none; }
+}
+
+/* ---- Reduced motion — collapse every mode to a 150ms cross-fade ---- */
+
+@media (prefers-reduced-motion: reduce) {
+ ::view-transition-old(root),
+ ::view-transition-old(vt-folder-evergreen),
+ ::view-transition-old(vt-folder-copper),
+ ::view-transition-old(vt-folder-lavender),
+ ::view-transition-old(vt-folder-cream),
+ ::view-transition-old(vt-folder-lava) {
+  animation: vt-fade-out 150ms ease-in-out both;
+ }
+ ::view-transition-new(root),
+ ::view-transition-new(vt-folder-evergreen),
+ ::view-transition-new(vt-folder-copper),
+ ::view-transition-new(vt-folder-lavender),
+ ::view-transition-new(vt-folder-cream),
+ ::view-transition-new(vt-folder-lava) {
+  animation: vt-fade-in 150ms ease-in-out both;
+ }
+ ::view-transition-group(vt-folder-evergreen),
+ ::view-transition-group(vt-folder-copper),
+ ::view-transition-group(vt-folder-lavender),
+ ::view-transition-group(vt-folder-cream),
+ ::view-transition-group(vt-folder-lava) {
+  animation: none;
+ }
+}

@@ -1,174 +1,114 @@
 import type { Metadata } from "next";
-import AnimatedSection from "@/components/ui/AnimatedSection";
-import SectionHeading from "@/components/ui/SectionHeading";
-import Badge from "@/components/ui/Badge";
-import { ButtonLink } from "@/components/ui/Button";
-import type { TechCategory, TimelineEntry } from "@/types/content";
-import { SOCIAL_LINKS } from "@/lib/site-config";
+import { Link } from "next-view-transitions";
 
 export const metadata: Metadata = {
  title: "About",
  description:
-  "Rijad Rajkic — full-stack developer specializing in TypeScript, React, and Next.js.",
+  "Rijad Rajkic — software engineer based in Sarajevo. Full-stack web with TypeScript, React, and Next.js.",
 };
 
-const techStack: TechCategory[] = [
- {
-  label: "Languages",
-  items: ["TypeScript", "JavaScript", "Python", "C++", "SQL"],
- },
- {
-  label: "Frontend",
-  items: ["React", "Next.js", "Tailwind CSS", "HTML/CSS", "React Native"],
- },
- {
-  label: "Backend",
-  items: ["Node.js", "Express", "PostgreSQL", "Prisma", "REST APIs"],
- },
- {
-  label: "Tools & Infra",
-  items: ["Git", "Vercel", "Docker", "VS Code", "Notion API"],
- },
+interface QuickFactProps {
+ label: string;
+ lines: string[];
+}
+
+function QuickFact({ label, lines }: QuickFactProps) {
+ return (
+  <div>
+   <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-(--accent)">
+    {label}
+   </div>
+   {lines.map((line) => (
+    <div key={line} className="text-sm leading-relaxed text-(--color-text)">
+     {line}
+    </div>
+   ))}
+  </div>
+ );
+}
+
+// Quick facts are intentionally short and fill-in-the-blank — edit these in
+// place when starting a new month / project / book / playlist. The shape stays
+// fixed; the contents change.
+const QUICK_FACTS: QuickFactProps[] = [
+ { label: "Currently", lines: ["Sarajevo, Bosnia"] },
+ { label: "Stack", lines: ["TypeScript · React · Next.js", "Node.js · Postgres · Notion API"] },
+ { label: "Reading", lines: ["—"] },
+ { label: "Listening", lines: ["—"] },
 ];
 
-const timeline: TimelineEntry[] = [
- {
-  year: "2026",
-  title: "Portfolio rebuild",
-  description:
-   "Rebuilt personal website from scratch with Next.js App Router, Tailwind CSS v4, and a fully custom design system.",
- },
- {
-  year: "2025",
-  title: "Client & side projects",
-  description:
-   "Shipped Business by Bega (client brand site with Notion CMS), continued ShelfSync development, and built the Client Tab Manager browser extension.",
- },
- {
-  year: "2024",
-  title: "Enterprise UI work",
-  description:
-   "Built the Sila Frontend component library for a fintech application — theming system, accessible forms, and responsive layouts.",
- },
- {
-  year: "2023",
-  title: "Full-stack foundations",
-  description:
-   "Deepened expertise in TypeScript, Node.js, and PostgreSQL. Started contributing to open source and building developer tools.",
- },
-];
+const linkInline =
+ "border-b border-(--color-border-strong) text-(--color-text) transition hover:border-(--accent) hover:text-(--accent)";
 
 export default function AboutPage() {
  return (
-  <>
-   {/* ───── Header ───── */}
-   <AnimatedSection padded={false} className="pb-0 pt-24 md:pt-32">
-    <SectionHeading
-     eyebrow="About"
-     title="A bit about me"
-     description="I'm a full-stack developer who cares about clean code, accessible interfaces, and shipping things that work."
+  <article className="mx-auto max-w-[980px] px-6 pt-14 pb-24 md:px-16 md:pt-20 md:pb-28">
+   <div className="page-eyebrow mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-(--accent)">
+    <span
+     className="h-1.5 w-1.5 rounded-full bg-(--accent)"
+     aria-hidden
     />
-   </AnimatedSection>
+    About
+   </div>
 
-   {/* ───── Bio ───── */}
-   <AnimatedSection amount={0.15}>
-    <div className="mx-auto max-w-3xl space-y-6">
-     <p className="animate fade-up text-base leading-relaxed text-(--color-text-muted) md:text-lg" data-stagger="0">
-      I&apos;m Rijad Rajkic — a software engineer working primarily with TypeScript, React, and
-      Next.js. I build full-stack web applications, developer tools, and the occasional browser
-      extension. My focus is on performance, accessibility, and maintainable architecture.
+   <h1 className="page-title text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl lg:text-6xl">
+    A bit about me.
+   </h1>
+
+   <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-(--color-text-muted) md:text-xl">
+    I&apos;m Rijad — a software engineer based in Sarajevo. I build full-stack web applications, mostly with TypeScript,
+    React, and Next.js. Some days I write Go on the backend. Most days I&apos;m just trying to make software that&apos;s
+    quiet, considered, and gets out of the way.
+   </p>
+
+   <div className="mt-12 grid gap-12 md:mt-16 md:grid-cols-[minmax(0,1fr)_220px]">
+    <div className="space-y-5 text-base leading-relaxed text-(--color-text-muted) md:text-lg">
+     <p>
+      Most of my work right now centers on a setup I genuinely love: Next.js on the front, a Notion database as the CMS.
+      It means I can edit a blog post on my phone, drag a project card into a different order, and the site updates
+      without me opening a code editor.
      </p>
-     <p className="animate fade-up text-base leading-relaxed text-(--color-text-muted) md:text-lg" data-stagger="1">
-      I believe the best software is invisible — it does what users need without friction or
-      confusion. That principle guides every decision, from choosing server components over client
-      data-fetching to building a pure-CSS animation system instead of shipping a heavy runtime.
+
+     <h2 className="!mt-12 !mb-3 text-2xl font-bold tracking-[-0.01em] text-(--color-text)">How I work</h2>
+     <p>
+      I take the engineer-first part of my job seriously. That means caring about how a product is built, not just what
+      it looks like at the end — small bundle sizes, sensible defaults, fast loads, an interface that feels considered
+      everywhere you touch it.
      </p>
-     <p className="animate fade-up text-base leading-relaxed text-(--color-text-muted) md:text-lg" data-stagger="2">
-      When I&apos;m not coding, I&apos;m usually reading, exploring new tools, or working on side
-      projects that scratch an itch.
+     <p>
+      I also draw, sketch, and design when I need to. Not because I&apos;m pretending to be a designer, but because the
+      best engineers I know can pick up a pencil.{" "}
+      <strong className="text-(--color-text)">Engineer first, designer when needed.</strong>
      </p>
-    </div>
-   </AnimatedSection>
 
-   {/* ───── Tech Stack ───── */}
-   <AnimatedSection tone="surface" amount={0.15}>
-    <SectionHeading
-     eyebrow="Stack"
-     title="Technologies I work with"
-    />
-
-    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-     {techStack.map((category, catIdx) => (
-      <div
-       key={category.label}
-       className="animate fade-up"
-       data-stagger={catIdx}
-      >
-       <h4 className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-(--color-text-muted)">
-        {category.label}
-       </h4>
-       <div className="flex flex-wrap gap-2">
-        {category.items.map((item) => (
-         <Badge key={item}>{item}</Badge>
-        ))}
-       </div>
-      </div>
-     ))}
-    </div>
-   </AnimatedSection>
-
-   {/* ───── Timeline ───── */}
-   <AnimatedSection amount={0.1}>
-    <SectionHeading
-     eyebrow="Timeline"
-     title="What I've been up to"
-    />
-
-    <div className="mx-auto max-w-3xl">
-     <div className="relative space-y-10 border-l-2 border-(--color-border) pl-8">
-      {timeline.map((entry, i) => (
-       <div key={entry.year + entry.title} className="animate fade-up relative" data-stagger={i}>
-        {/* Dot */}
-        <div className="absolute -left-[calc(2rem+5px)] top-1.5 h-2.5 w-2.5 rounded-full bg-(--color-brand)" />
-
-        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-(--color-brand)">
-         {entry.year}
-        </span>
-        <h4 className="mt-1 text-lg font-bold text-(--color-text)">
-         {entry.title}
-        </h4>
-        <p className="mt-2 text-sm text-(--color-text-muted)">
-         {entry.description}
-        </p>
-       </div>
-      ))}
-     </div>
-    </div>
-   </AnimatedSection>
-
-   {/* ───── CTA ───── */}
-   <AnimatedSection tone="brand" amount={0.15}>
-    <div className="mx-auto max-w-3xl text-center">
-     <h2 className="animate fade-up text-4xl font-bold tracking-tight md:text-5xl" data-stagger="0">
-      Want to work together?
+     <h2 className="!mt-12 !mb-3 text-2xl font-bold tracking-[-0.01em] text-(--color-text)">
+      What I&apos;m currently into
      </h2>
-     <p className="animate fade-up mt-4 text-lg text-(--color-text-muted)" data-stagger="1">
-      I&apos;m always open to interesting projects and collaborations.
+     <p>
+      React Server Components — the mental shift, not the syntax. CSS that does the work animation libraries used to.
+      Long-form writing as a way to figure out what I actually think.
      </p>
-     <div className="animate fade-up mt-8 flex items-center justify-center gap-3" data-stagger="2">
-      <ButtonLink href="/contact">
-       Get in Touch
-      </ButtonLink>
-      <ButtonLink
-       href={SOCIAL_LINKS.github}
-       variant="ghost"
-       className="border-(--color-border) text-(--color-text) hover:bg-(--color-surface)"
-      >
-       GitHub ↗
-      </ButtonLink>
-     </div>
+
+     <h2 className="!mt-12 !mb-3 text-2xl font-bold tracking-[-0.01em] text-(--color-text)">How to find me</h2>
+     <p>
+      The quickest path is the{" "}
+      <Link href="/?contact=open" className={linkInline}>
+       contact drawer
+      </Link>{" "}
+      — name, email, message, done. I read every one. If you&apos;d rather see what I&apos;m making, my{" "}
+      <Link href="/projects" className={linkInline}>
+       projects
+      </Link>{" "}
+      live a click away.
+     </p>
     </div>
-   </AnimatedSection>
-  </>
+
+    <aside className="space-y-6 self-start md:sticky md:top-24">
+     {QUICK_FACTS.map((fact) => (
+      <QuickFact key={fact.label} label={fact.label} lines={fact.lines} />
+     ))}
+    </aside>
+   </div>
+  </article>
  );
 }

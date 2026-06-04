@@ -3,7 +3,10 @@ export const DEFAULT_SITE_URL = "https://rijadrajkic.com";
 export const SOCIAL_LINKS = {
  github: "https://github.com/RijadRajkic",
  linkedin: "https://www.linkedin.com/in/rijad-rajkic",
+ email: "rijadrajkic@gmail.com",
 } as const;
+
+export const CURRENTLY_BUILDING = "Inventory Management System";
 
 function normalizeSiteUrl(value: string): string {
  const trimmed = value.trim();

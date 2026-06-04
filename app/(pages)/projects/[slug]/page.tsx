@@ -1,114 +1,120 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import AnimatedSection from "@/components/ui/AnimatedSection";
-import Badge from "@/components/ui/Badge";
-import { ButtonLink } from "@/components/ui/Button";
+import { Link } from "next-view-transitions";
 import { getPublishedProjects, getProjectBySlug } from "@/lib/data/projects";
+import type { Project } from "@/types/content";
 
 interface PageProps {
  params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
- return getPublishedProjects().map((p) => ({ slug: p.slug }));
+ const all = await getPublishedProjects();
+ return all.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
  const { slug } = await params;
- const project = getProjectBySlug(slug);
+ const project = await getProjectBySlug(slug);
  if (!project) return {};
- return {
-  title: project.title,
-  description: project.description,
- };
+ return { title: project.title, description: project.description };
+}
+
+function getInitials(title: string): string {
+ return title.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+}
+
+async function getNextProject(current: Project): Promise<Project> {
+ const all = await getPublishedProjects();
+ const idx = all.findIndex((p) => p.slug === current.slug);
+ return all[(idx + 1) % all.length];
 }
 
 export default async function ProjectDetailPage({ params }: PageProps) {
  const { slug } = await params;
- const project = getProjectBySlug(slug);
+ const project = await getProjectBySlug(slug);
  if (!project) notFound();
+ const next = await getNextProject(project);
 
  return (
-  <>
-   {/* ───── Hero ───── */}
-   <AnimatedSection padded={false} className="pb-0 pt-24 md:pt-32">
-    <div className="mx-auto max-w-3xl">
-     <Link
-      href="/projects"
-      className="animate fade-up mb-8 inline-flex text-sm font-medium text-(--color-text-muted) transition hover:text-(--color-brand)"
-      data-stagger="0"
-     >
-      ← All projects
-     </Link>
+  <article className="mx-auto max-w-[880px] px-6 pt-14 pb-24 md:px-16 md:pt-16 md:pb-28">
+   <Link
+    href="/projects"
+    className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-(--accent) transition hover:opacity-80"
+   >
+    <span aria-hidden>←</span> All projects
+   </Link>
 
-     <div className="animate fade-up mb-4 flex flex-wrap items-center gap-2" data-stagger="1">
-      <Badge>{project.category}</Badge>
-      <span className="text-xs text-(--color-text-muted)">{project.year}</span>
+   <h1 className="page-title mt-6 text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-(--color-text) md:text-5xl lg:text-6xl">
+    {project.title}
+   </h1>
+
+   <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-(--color-text-muted)">
+    <span className="font-mono text-(--accent)">{project.year}</span>
+    <span className="opacity-40">·</span>
+    <span>{project.category}</span>
+    {project.liveUrl && (
+     <>
+      <span className="opacity-40">·</span>
+      <a
+       href={project.liveUrl}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="border-b border-(--color-border-strong) text-(--color-text) transition hover:border-(--accent) hover:text-(--accent)"
+      >
+       Visit site ↗
+      </a>
+     </>
+    )}
+    {project.sourceUrl && (
+     <>
+      <span className="opacity-40">·</span>
+      <a
+       href={project.sourceUrl}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="border-b border-(--color-border-strong) text-(--color-text) transition hover:border-(--accent) hover:text-(--accent)"
+      >
+       Source ↗
+      </a>
+     </>
+    )}
+   </div>
+
+   <div className="relative mt-8 grid aspect-[16/9] place-items-center overflow-hidden rounded-2xl border border-(--color-border) bg-[linear-gradient(135deg,color-mix(in_srgb,var(--accent)_30%,transparent),rgba(0,0,0,0.4))]">
+    <div
+     aria-hidden
+     className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(240,236,230,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(240,236,230,0.06)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_35%_50%,black,transparent_80%)]"
+    />
+    <div className="font-mono text-6xl font-bold tracking-[-0.04em] text-(--accent)/50 md:text-8xl">
+     {getInitials(project.title)}
+    </div>
+   </div>
+
+   {project.body && project.body.length > 0 && (
+    <div className="prose-wrapper mt-10 space-y-5 text-base leading-relaxed text-(--color-text-muted) md:text-lg">
+     {project.body.map((paragraph, i) => (
+      <p key={i}>{paragraph}</p>
+     ))}
+    </div>
+   )}
+
+   <Link
+    href={`/projects/${next.slug}`}
+    className="group mt-16 flex items-center justify-between gap-4 rounded-2xl border border-(--color-border) bg-(--color-surface)/40 px-6 py-5 transition-all duration-300 hover:-translate-y-1 hover:border-(--accent)/40 md:px-7 md:py-6"
+   >
+    <div>
+     <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-(--accent)">
+      Next project
      </div>
-
-     <h1
-      className="animate fade-up text-4xl font-bold tracking-tight text-(--color-text) md:text-5xl lg:text-6xl"
-      data-stagger="2"
-     >
-      {project.title}
-     </h1>
-
-     <p
-      className="animate fade-up mt-6 text-lg text-(--color-text-muted) md:text-xl"
-      data-stagger="3"
-     >
-      {project.description}
-     </p>
-
-     <div
-      className="animate fade-up mt-4 flex flex-wrap gap-1.5"
-      data-stagger="4"
-     >
-      {project.techStack.map((tech) => (
-       <span
-        key={tech}
-        className="rounded-full bg-(--color-surface) px-3 py-1 text-xs font-medium text-(--color-text-muted)"
-       >
-        {tech}
-       </span>
-      ))}
-     </div>
-
-     <div
-      className="animate fade-up mt-8 flex items-center gap-3"
-      data-stagger="5"
-     >
-      {project.liveUrl && (
-       <ButtonLink href={project.liveUrl} size="md">
-        Visit Live Site ↗
-       </ButtonLink>
-      )}
-      {project.sourceUrl && (
-       <ButtonLink href={project.sourceUrl} variant="ghost" size="md">
-        View Source ↗
-       </ButtonLink>
-      )}
+     <div className="mt-1 text-xl font-bold tracking-tight text-(--color-text) md:text-2xl">
+      {next.title}
      </div>
     </div>
-   </AnimatedSection>
-
-   {/* ───── Body ───── */}
-   {project.body && project.body.length > 0 && (
-    <AnimatedSection amount={0.1}>
-     <div className="prose-wrapper mx-auto max-w-3xl space-y-6">
-      {project.body.map((paragraph, i) => (
-       <p
-        key={i}
-        className="animate fade-up text-base leading-relaxed text-(--color-text-muted) md:text-lg"
-        data-stagger={i}
-       >
-        {paragraph}
-       </p>
-      ))}
-     </div>
-    </AnimatedSection>
-   )}
-  </>
+    <span aria-hidden className="text-2xl text-(--accent) transition-transform duration-300 group-hover:translate-x-1">
+     →
+    </span>
+   </Link>
+  </article>
  );
 }
