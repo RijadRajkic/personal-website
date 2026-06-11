@@ -34,10 +34,10 @@ export default function NowPage() {
       could stop shipping Framer Motion. Writing about it as I go.
      </p>
      <p>
-      Most of my hours go into{" "}
-      <strong className="text-(--color-almond-cream-50)">ShelfSync</strong> — a book-tracking platform that started as
-      my own frustration with three half-broken setups for the same problem. The mobile app is in soft launch. The
-      surface stays small on purpose.
+      Next up is{" "}
+      <strong className="text-(--color-almond-cream-50)">ShelfSync</strong>{" "}— a home-inventory app for keeping track of
+      what&apos;s on your shelves, in the pantry, and in storage. Still on paper: the stack is picked (Go and Flutter)
+      and a v1 scope is drawn up. On hold until this site ships, then it gets real hours.
      </p>
      <p>
       Thinking a lot about how much software work is just choosing what to leave out. The pages, the features, the
