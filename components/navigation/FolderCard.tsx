@@ -209,12 +209,30 @@ export default function FolderCard({
  // method links, and the branding block live inside.
  const renderHeroLayer = (visible: boolean) => {
   if (!heroContent) return null;
+  const inner = <div className="h-full px-5 pt-5 pb-5 md:px-8 md:pt-6 md:pb-6 lg:px-10">{heroContent}</div>;
+
+  // Non-toggle hero cards (Projects) navigate on click — the whole hero surface
+  // is the canonical <Link>, so the front card isn't a dead click target. Toggle
+  // cards (Contact) carry their own form/links and must not be wrapped.
+  if (!heroToggleId) {
+   return (
+    <Link
+     href={href}
+     className={`${layerBase} ${visible ? visibleLayer : hiddenLayer}`}
+     aria-label={title}
+     aria-hidden={!visible}
+     tabIndex={visible ? undefined : -1}
+    >
+     {inner}
+    </Link>
+   );
+  }
   return (
    <div
     className={`${layerBase} ${visible ? visibleLayer : hiddenLayer}`}
     aria-hidden={!visible}
    >
-    <div className="h-full px-5 pt-5 pb-5 md:px-8 md:pt-6 md:pb-6 lg:px-10">{heroContent}</div>
+    {inner}
    </div>
   );
  };
