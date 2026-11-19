@@ -20,7 +20,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.72.1",
     "tailwindcss": "^4.2.2",
-    "updraft-css": "github:RijadRajkic/updraft#v1.1.0"
+    "updraft-css": "https://github.com/RijadRajkic/updraft/archive/refs/tags/v1.1.0.tar.gz"
   },
   "devDependencies": {
     "@types/node": "^20",
