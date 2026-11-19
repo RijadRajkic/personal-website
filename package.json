@@ -13,14 +13,14 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "aero-css": "https://github.com/RijadRajkic/aero/archive/refs/tags/v1.1.1.tar.gz",
     "next": "16.2.4",
     "next-view-transitions": "^0.3.5",
     "postcss": "^8.5.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.72.1",
-    "tailwindcss": "^4.2.2",
-    "updraft-css": "https://github.com/RijadRajkic/updraft/archive/refs/tags/v1.1.0.tar.gz"
+    "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
     "@types/node": "^20",
