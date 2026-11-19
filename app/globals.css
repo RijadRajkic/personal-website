@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "aero-css/animations.css";
+@import "aero-css/legacy.css";
 
 /* ============================================================================
  * Theme — Tailwind v4 custom design tokens
@@ -326,7 +326,7 @@ body {
 }
 
 /* Intentional: no global prefers-reduced-motion override.
- * The animation library (Aero, aero-css/animations.css) and this file
+ * The animation library (Aero, aero-css/legacy.css: the 1.x class names) and this file
  * opt to play tasteful site motion even when users enable OS-level
  * Reduce Motion, since that setting is typically meant to tame heavy
  * system UI — not site micro-interactions. Individual components can
